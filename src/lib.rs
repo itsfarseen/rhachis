@@ -1,10 +1,9 @@
 pub mod graphics;
 pub mod input;
 
-use std::sync::Mutex;
-
 use graphics::Graphics;
 use input::Input;
+use parking_lot::Mutex;
 use winit::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -43,24 +42,22 @@ where
         event_loop.run(move |event, _, control_flow| match event {
             Event::MainEventsCleared => {
                 game.update(&data);
-                data.input.lock().unwrap().update();
+                data.input.lock().update();
                 window.request_redraw();
             }
-            Event::RedrawRequested(..) => data.graphics.lock().unwrap().render(),
+            Event::RedrawRequested(..) => data.graphics.lock().render(),
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-                WindowEvent::KeyboardInput { input, .. } => {
-                    data.input.lock().unwrap().handle_key(input)
-                }
+                WindowEvent::KeyboardInput { input, .. } => data.input.lock().handle_key(input),
                 WindowEvent::MouseInput { state, button, .. } => {
-                    data.input.lock().unwrap().handle_button(button, state)
+                    data.input.lock().handle_button(button, state)
                 }
                 WindowEvent::CursorMoved { position, .. } => {
-                    data.input.lock().unwrap().handle_cursor(position)
+                    data.input.lock().handle_cursor(position)
                 }
-                WindowEvent::Resized(size) => data.graphics.lock().unwrap().resize(size),
+                WindowEvent::Resized(size) => data.graphics.lock().resize(size),
                 WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                    data.graphics.lock().unwrap().resize(*new_inner_size)
+                    data.graphics.lock().resize(*new_inner_size)
                 }
                 _ => {}
             },
