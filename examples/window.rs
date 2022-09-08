@@ -7,7 +7,7 @@ fn main() {
 struct Window;
 
 impl Game for Window {
-    fn init() -> Self {
+    fn init(_: &GameData) -> Self {
         Self
     }
 }

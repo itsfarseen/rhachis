@@ -14,7 +14,8 @@ pub struct GameData {
 }
 
 pub trait Game {
-    fn init() -> Self;
+    fn init(data: &GameData) -> Self;
+    fn update(&mut self, _: &GameData) {}
 }
 
 pub trait GameExt {
@@ -23,7 +24,7 @@ pub trait GameExt {
 
 impl<T> GameExt for T
 where
-    T: Game,
+    T: Game + 'static,
 {
     fn run() {
         let event_loop = EventLoop::new();
@@ -33,8 +34,13 @@ where
             graphics: Mutex::new(pollster::block_on(Graphics::new(&window))),
         };
 
+        let mut game = Self::init(&data);
+
         event_loop.run(move |event, _, control_flow| match event {
-            Event::MainEventsCleared => window.request_redraw(),
+            Event::MainEventsCleared => {
+                game.update(&data);
+                window.request_redraw();
+            }
             Event::RedrawRequested(..) => data.graphics.lock().unwrap().render(),
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
