@@ -1,5 +1,5 @@
 use wgpu::{Device, Queue, Surface, SurfaceConfiguration};
-use winit::{window::Window, dpi::PhysicalSize};
+use winit::{dpi::PhysicalSize, window::Window};
 
 pub struct Graphics {
     device: Device,
@@ -61,7 +61,7 @@ impl Graphics {
         let mut encoder = self
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-        
+
         {
             let render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("render_pass"),
