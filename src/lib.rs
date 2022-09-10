@@ -7,12 +7,13 @@ use parking_lot::Mutex;
 use winit::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::WindowBuilder,
+    window::{WindowBuilder, Window},
 };
 
 pub struct GameData {
     pub graphics: Mutex<Graphics>,
     pub input: Mutex<Input>,
+    pub window: Mutex<Window>,
 }
 
 pub trait Game {
@@ -36,6 +37,7 @@ where
         let data = GameData {
             graphics: Mutex::new(pollster::block_on(Graphics::new(&window))),
             input: Mutex::new(Input::new()),
+            window: Mutex::new(window),
         };
 
         let mut game = Self::init(&data);
@@ -44,7 +46,7 @@ where
             Event::MainEventsCleared => {
                 game.update(&data);
                 data.input.lock().update();
-                window.request_redraw();
+                data.window.lock().request_redraw();
             }
             Event::RedrawRequested(..) => data.graphics.lock().render(game.get_renderer()),
             Event::WindowEvent { event, .. } => match event {
