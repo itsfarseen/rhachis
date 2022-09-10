@@ -1,12 +1,11 @@
+use std::mem::size_of;
+
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
     Buffer, RenderPipeline,
 };
 
-use crate::{
-    graphics::{ColorVertex, Renderer},
-    GameData,
-};
+use crate::{graphics::Renderer, GameData};
 
 pub struct SimpleRenderer {
     pipeline: RenderPipeline,
@@ -94,5 +93,33 @@ impl Renderer for SimpleRenderer {
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         render_pass.draw(0..3, 0..1);
+    }
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct ColorVertex {
+    pub pos: [f32; 3],
+    pub color: [f32; 4],
+}
+
+impl ColorVertex {
+    pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
+        wgpu::VertexBufferLayout {
+            array_stride: size_of::<Self>() as u64,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &[
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x3,
+                    offset: 0,
+                    shader_location: 0,
+                },
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x4,
+                    offset: size_of::<[f32; 3]>() as u64,
+                    shader_location: 1,
+                },
+            ],
+        }
     }
 }
