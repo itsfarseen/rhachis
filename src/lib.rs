@@ -1,5 +1,6 @@
 pub mod graphics;
 pub mod input;
+pub mod renderers;
 
 use graphics::{Graphics, Renderer};
 use input::Input;
