@@ -11,7 +11,7 @@ struct ColorOutput {
 @vertex
 fn color_vertex(input: ColorInput) -> ColorOutput {
     var output: ColorOutput;
-    output.pos = vec4<f32>(input.pos, 0.0);
+    output.pos = vec4<f32>(input.pos, 1.0);
     output.color = input.color;
     return output;
 }
