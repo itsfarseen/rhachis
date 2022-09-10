@@ -1,7 +1,7 @@
 pub mod graphics;
 pub mod input;
 
-use graphics::Graphics;
+use graphics::{Graphics, Renderer};
 use input::Input;
 use parking_lot::Mutex;
 use winit::{
@@ -18,6 +18,7 @@ pub struct GameData {
 pub trait Game {
     fn init(data: &GameData) -> Self;
     fn update(&mut self, _: &GameData) {}
+    fn get_renderer(&mut self) -> &mut dyn Renderer;
 }
 
 pub trait GameExt {
@@ -45,7 +46,7 @@ where
                 data.input.lock().update();
                 window.request_redraw();
             }
-            Event::RedrawRequested(..) => data.graphics.lock().render(),
+            Event::RedrawRequested(..) => data.graphics.lock().render(game.get_renderer()),
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 WindowEvent::KeyboardInput { input, .. } => data.input.lock().handle_key(input),

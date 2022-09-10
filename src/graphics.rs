@@ -1,4 +1,4 @@
-use wgpu::{Device, Queue, Surface, SurfaceConfiguration};
+use wgpu::{CommandEncoder, Device, Queue, RenderPass, Surface, SurfaceConfiguration, TextureView};
 use winit::{dpi::PhysicalSize, window::Window};
 
 pub struct Graphics {
@@ -52,7 +52,7 @@ impl Graphics {
         }
     }
 
-    pub(crate) fn render(&mut self) {
+    pub(crate) fn render(&mut self, renderer: &mut dyn Renderer) {
         let output = self.surface.get_current_texture().unwrap();
         let view = output
             .texture
@@ -63,18 +63,7 @@ impl Graphics {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
         {
-            let render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("render_pass"),
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &view,
-                    resolve_target: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
-                        store: true,
-                    },
-                })],
-                depth_stencil_attachment: None,
-            });
+            let _render_pass = renderer.make_render_pass(&view, &mut encoder);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
@@ -87,3 +76,28 @@ impl Graphics {
         self.surface.configure(&self.device, &self.config);
     }
 }
+
+pub trait Renderer {
+    fn make_render_pass<'a>(
+        &'a mut self,
+        view: &'a TextureView,
+        encoder: &'a mut CommandEncoder,
+    ) -> RenderPass {
+        encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("render_pass"),
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                    store: true,
+                },
+            })],
+            depth_stencil_attachment: None,
+        })
+    }
+}
+
+pub struct EmptyRenderer;
+
+impl Renderer for EmptyRenderer {}
