@@ -4,8 +4,8 @@ use wgpu::{CommandEncoder, Device, Queue, RenderPass, Surface, SurfaceConfigurat
 use winit::{dpi::PhysicalSize, window::Window};
 
 pub struct Graphics {
-    device: Device,
-    queue: Queue,
+    pub device: Device,
+    pub queue: Queue,
     surface: Surface,
     config: SurfaceConfiguration,
 }
@@ -104,6 +104,8 @@ pub struct EmptyRenderer;
 
 impl Renderer for EmptyRenderer {}
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct ColorVertex {
     pub pos: [f32; 3],
     pub color: [f32; 4],
