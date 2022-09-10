@@ -1,5 +1,5 @@
 [default]
-cargo run --example window
+cargo run --example tri
 
 [check]
 cargo clippy && cargo fmt
