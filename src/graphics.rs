@@ -6,8 +6,8 @@ use winit::{dpi::PhysicalSize, window::Window};
 pub struct Graphics {
     pub device: Device,
     pub queue: Queue,
-    surface: Surface,
-    config: SurfaceConfiguration,
+    pub surface: Surface,
+    pub config: SurfaceConfiguration,
 }
 
 impl Graphics {
@@ -127,7 +127,7 @@ impl ColorVertex {
                     offset: size_of::<[f32; 3]>() as u64,
                     shader_location: 1,
                 },
-            ]
+            ],
         }
     }
 }

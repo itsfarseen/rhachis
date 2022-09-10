@@ -7,7 +7,7 @@ use parking_lot::Mutex;
 use winit::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::{WindowBuilder, Window},
+    window::{Window, WindowBuilder},
 };
 
 pub struct GameData {
