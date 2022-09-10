@@ -1,3 +1,5 @@
+use std::mem::size_of;
+
 use wgpu::{CommandEncoder, Device, Queue, RenderPass, Surface, SurfaceConfiguration, TextureView};
 use winit::{dpi::PhysicalSize, window::Window};
 
@@ -101,3 +103,29 @@ pub trait Renderer {
 pub struct EmptyRenderer;
 
 impl Renderer for EmptyRenderer {}
+
+pub struct ColorVertex {
+    pub pos: [f32; 3],
+    pub color: [f32; 4],
+}
+
+impl ColorVertex {
+    pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
+        wgpu::VertexBufferLayout {
+            array_stride: size_of::<Self>() as u64,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &[
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x3,
+                    offset: 0,
+                    shader_location: 0,
+                },
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x4,
+                    offset: size_of::<[f32; 3]>() as u64,
+                    shader_location: 1,
+                },
+            ]
+        }
+    }
+}
