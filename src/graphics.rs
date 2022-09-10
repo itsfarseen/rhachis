@@ -65,7 +65,8 @@ impl Graphics {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
         {
-            let _render_pass = renderer.make_render_pass(&view, &mut encoder);
+            let render_pass = renderer.make_render_pass(&view, &mut encoder);
+            renderer.render(render_pass);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
@@ -81,7 +82,7 @@ impl Graphics {
 
 pub trait Renderer {
     fn make_render_pass<'a>(
-        &'a mut self,
+        &'a self,
         view: &'a TextureView,
         encoder: &'a mut CommandEncoder,
     ) -> RenderPass {
@@ -98,6 +99,8 @@ pub trait Renderer {
             depth_stencil_attachment: None,
         })
     }
+
+    fn render(&self, _: RenderPass) {}
 }
 
 pub struct EmptyRenderer;
