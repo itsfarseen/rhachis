@@ -1,6 +1,7 @@
 use rhachis::{graphics::Renderer, *};
 
 fn main() {
+    Tri::run();
 }
 
 struct Tri {
