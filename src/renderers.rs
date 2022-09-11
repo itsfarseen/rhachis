@@ -10,6 +10,7 @@ use crate::{graphics::Renderer, GameData};
 
 pub struct SimpleRenderer {
     color_pipeline: RenderPipeline,
+    texture_pipeline: RenderPipeline,
     pub models: Vec<Model>,
 }
 
@@ -17,6 +18,7 @@ impl SimpleRenderer {
     pub fn new(data: &GameData) -> Self {
         Self {
             color_pipeline: Self::color_pipeline(data),
+            texture_pipeline: Self::texture_pipeline(data),
             models: Vec::new(),
         }
     }
@@ -34,7 +36,7 @@ impl SimpleRenderer {
         graphics
             .device
             .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                label: Some("Tri Pipeline"),
+                label: Some("Tri Color Pipeline"),
                 layout: Some(&graphics.device.create_pipeline_layout(
                     &wgpu::PipelineLayoutDescriptor {
                         label: None,
@@ -50,6 +52,60 @@ impl SimpleRenderer {
                 fragment: Some(wgpu::FragmentState {
                     module: &shader,
                     entry_point: "color_fragment",
+                    targets: &[Some(wgpu::ColorTargetState {
+                        format: graphics.config.format,
+                        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+                        write_mask: wgpu::ColorWrites::ALL,
+                    })],
+                }),
+                primitive: wgpu::PrimitiveState {
+                    topology: wgpu::PrimitiveTopology::TriangleList,
+                    strip_index_format: None,
+                    front_face: wgpu::FrontFace::Ccw,
+                    cull_mode: Some(wgpu::Face::Back),
+                    unclipped_depth: false,
+                    polygon_mode: wgpu::PolygonMode::Fill,
+                    conservative: false,
+                },
+                depth_stencil: None,
+                multisample: wgpu::MultisampleState {
+                    count: 1,
+                    mask: !0,
+                    alpha_to_coverage_enabled: false,
+                },
+                multiview: None,
+            })
+    }
+
+    pub fn texture_pipeline(data: &GameData) -> RenderPipeline {
+        let graphics = data.graphics.lock();
+
+        let shader = graphics
+            .device
+            .create_shader_module(wgpu::ShaderModuleDescriptor {
+                label: None,
+                source: wgpu::ShaderSource::Wgsl(include_str!("simple.wgsl").into()),
+            });
+
+        graphics
+            .device
+            .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: Some("Tri Texture Pipeline"),
+                layout: Some(&graphics.device.create_pipeline_layout(
+                    &wgpu::PipelineLayoutDescriptor {
+                        label: None,
+                        bind_group_layouts: &[],
+                        push_constant_ranges: &[],
+                    },
+                )),
+                vertex: wgpu::VertexState {
+                    module: &shader,
+                    entry_point: "texture_vertex",
+                    buffers: &[TextureVertex::desc(), Transform::desc()],
+                },
+                fragment: Some(wgpu::FragmentState {
+                    module: &shader,
+                    entry_point: "texture_fragment",
                     targets: &[Some(wgpu::ColorTargetState {
                         format: graphics.config.format,
                         blend: Some(wgpu::BlendState::ALPHA_BLENDING),
