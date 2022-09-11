@@ -1,5 +1,5 @@
 use rhachis::{
-    renderers::{Model, SimpleRenderer, TextureVertex, Transform, VertexSlice},
+    renderers::{Model, SimpleRenderer, TextureVertex, Transform, VertexSlice, Texture},
     Game, GameExt,
 };
 
@@ -33,7 +33,7 @@ impl Game for Image {
                     pos: [1.0, 1.0, 0.0],
                     tex_coords: [1.0, 1.0],
                 },
-            ]),
+            ], Texture::new(data, &image::open("examples/test.png").unwrap(), &renderer.nearest_sampler)),
             &[0, 1, 2, 1, 3, 2],
             &[Transform::default().matrix()],
         ));

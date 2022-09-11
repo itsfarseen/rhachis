@@ -1,16 +1,18 @@
-use std::mem::size_of;
+use std::{mem::size_of, num::NonZeroU32};
 
 use glam::{Mat4, Quat, Vec3};
+use image::{DynamicImage, GenericImageView};
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
-    Buffer, RenderPipeline,
+    Buffer, RenderPipeline, Sampler, BindGroup,
 };
 
-use crate::{graphics::Renderer, GameData};
+use crate::{graphics::{Renderer, self}, GameData};
 
 pub struct SimpleRenderer {
     color_pipeline: RenderPipeline,
     texture_pipeline: RenderPipeline,
+    pub nearest_sampler: Sampler,
     pub models: Vec<Model>,
 }
 
@@ -19,31 +21,34 @@ impl SimpleRenderer {
         Self {
             color_pipeline: Self::color_pipeline(data),
             texture_pipeline: Self::texture_pipeline(data),
+            nearest_sampler: Self::nearest_sampler(data),
             models: Vec::new(),
         }
     }
 
     pub fn color_pipeline(data: &GameData) -> RenderPipeline {
-        let graphics = data.graphics.lock();
-
-        let shader = graphics
+        let shader = data.graphics.lock()
             .device
             .create_shader_module(wgpu::ShaderModuleDescriptor {
                 label: None,
                 source: wgpu::ShaderSource::Wgsl(include_str!("simple.wgsl").into()),
             });
 
-        graphics
+        let color_pipeline_layout = data.graphics.lock().device.create_pipeline_layout(
+            &wgpu::PipelineLayoutDescriptor {
+                label: None,
+                bind_group_layouts: &[],
+                push_constant_ranges: &[],
+            },
+        );
+
+        let fragment_format = data.graphics.lock().config.format;
+
+        data.graphics.lock()
             .device
             .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some("Tri Color Pipeline"),
-                layout: Some(&graphics.device.create_pipeline_layout(
-                    &wgpu::PipelineLayoutDescriptor {
-                        label: None,
-                        bind_group_layouts: &[],
-                        push_constant_ranges: &[],
-                    },
-                )),
+                layout: Some(&color_pipeline_layout),
                 vertex: wgpu::VertexState {
                     module: &shader,
                     entry_point: "color_vertex",
@@ -53,7 +58,7 @@ impl SimpleRenderer {
                     module: &shader,
                     entry_point: "color_fragment",
                     targets: &[Some(wgpu::ColorTargetState {
-                        format: graphics.config.format,
+                        format: fragment_format,
                         blend: Some(wgpu::BlendState::ALPHA_BLENDING),
                         write_mask: wgpu::ColorWrites::ALL,
                     })],
@@ -78,26 +83,30 @@ impl SimpleRenderer {
     }
 
     pub fn texture_pipeline(data: &GameData) -> RenderPipeline {
-        let graphics = data.graphics.lock();
+        let texture_bind_group_layout = Texture::bind_group_layout(data);
 
-        let shader = graphics
+        let shader = data.graphics.lock()
             .device
             .create_shader_module(wgpu::ShaderModuleDescriptor {
                 label: None,
                 source: wgpu::ShaderSource::Wgsl(include_str!("simple.wgsl").into()),
             });
 
-        graphics
+        let texture_pipeline_layout = data.graphics.lock().device.create_pipeline_layout(
+            &wgpu::PipelineLayoutDescriptor {
+                label: None,
+                bind_group_layouts: &[&texture_bind_group_layout],
+                push_constant_ranges: &[],
+            },
+        );
+
+        let fragment_format = data.graphics.lock().config.format;
+
+        data.graphics.lock()
             .device
             .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some("Tri Texture Pipeline"),
-                layout: Some(&graphics.device.create_pipeline_layout(
-                    &wgpu::PipelineLayoutDescriptor {
-                        label: None,
-                        bind_group_layouts: &[],
-                        push_constant_ranges: &[],
-                    },
-                )),
+                layout: Some(&texture_pipeline_layout),
                 vertex: wgpu::VertexState {
                     module: &shader,
                     entry_point: "texture_vertex",
@@ -107,7 +116,7 @@ impl SimpleRenderer {
                     module: &shader,
                     entry_point: "texture_fragment",
                     targets: &[Some(wgpu::ColorTargetState {
-                        format: graphics.config.format,
+                        format: fragment_format,
                         blend: Some(wgpu::BlendState::ALPHA_BLENDING),
                         write_mask: wgpu::ColorWrites::ALL,
                     })],
@@ -130,6 +139,17 @@ impl SimpleRenderer {
                 multiview: None,
             })
     }
+
+    pub fn nearest_sampler(data: &GameData) -> Sampler {
+        data.graphics.lock().device.create_sampler(&wgpu::SamplerDescriptor {
+            address_mode_u: wgpu::AddressMode::Repeat,
+            address_mode_v: wgpu::AddressMode::Repeat,
+            address_mode_w: wgpu::AddressMode::Repeat,
+            mag_filter: wgpu::FilterMode::Nearest,
+            min_filter: wgpu::FilterMode::Nearest,
+            ..Default::default()
+        })
+    }
 }
 
 impl Renderer for SimpleRenderer {
@@ -149,14 +169,14 @@ impl Renderer for SimpleRenderer {
 
 pub enum VertexSlice<'a> {
     ColorVertices(&'a [ColorVertex]),
-    TextureVertices(&'a [TextureVertex]),
+    TextureVertices(&'a [TextureVertex], Texture),
 }
 
 impl VertexSlice<'_> {
     pub fn contents(&self) -> &[u8] {
         match *self {
             Self::ColorVertices(vertices) => bytemuck::cast_slice(vertices),
-            Self::TextureVertices(vertices) => bytemuck::cast_slice(vertices),
+            Self::TextureVertices(vertices, ..) => bytemuck::cast_slice(vertices),
         }
     }
 }
@@ -307,6 +327,98 @@ impl ColorVertex {
                 },
             ],
         }
+    }
+}
+
+pub struct Texture {
+    pub diffuse: BindGroup,
+}
+
+impl Texture {
+    pub fn new(
+        data: &GameData,
+        image: &DynamicImage,
+        sampler: &Sampler,
+    ) -> Texture {
+        let (width, height) = image.dimensions();
+
+        let size = wgpu::Extent3d {
+            width,
+            height,
+            depth_or_array_layers: 1,
+        };
+
+        let diffuse_texture = data.graphics.lock().device.create_texture(&wgpu::TextureDescriptor {
+            label: None,
+            size,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+        });
+
+        data.graphics.lock().queue.write_texture(
+            wgpu::ImageCopyTexture {
+                texture: &diffuse_texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            image.as_rgba8().unwrap(),
+            wgpu::ImageDataLayout {
+                offset: 0,
+                bytes_per_row: NonZeroU32::new(4 * width),
+                rows_per_image: NonZeroU32::new(height),
+            },
+            size,
+        );
+
+        let bind_group_layout = Texture::bind_group_layout(data);
+
+        let diffuse = data.graphics.lock().device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: None,
+            layout: &bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(
+                        &diffuse_texture.create_view(&wgpu::TextureViewDescriptor::default()),
+                    ),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(sampler),
+                },
+            ],
+        });
+
+        Texture { diffuse }
+    }
+
+    pub fn bind_group_layout(data: &GameData) -> wgpu::BindGroupLayout {
+        let graphics = data.graphics.lock();
+        graphics.device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: None,
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ]
+        })
     }
 }
 
