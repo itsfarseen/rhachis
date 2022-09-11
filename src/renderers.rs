@@ -9,7 +9,7 @@ use crate::{graphics::Renderer, GameData};
 
 pub struct SimpleRenderer {
     pipeline: RenderPipeline,
-    vertex_buffer: Buffer,
+    pub models: Vec<Model>,
 }
 
 impl SimpleRenderer {
@@ -66,24 +66,7 @@ impl SimpleRenderer {
                     },
                     multiview: None,
                 }),
-            vertex_buffer: graphics.device.create_buffer_init(&BufferInitDescriptor {
-                label: Some("Tri Vertices"),
-                contents: bytemuck::cast_slice(&[
-                    ColorVertex {
-                        pos: [0.0, 0.0, 0.0],
-                        color: [1.0, 1.0, 1.0, 1.0],
-                    },
-                    ColorVertex {
-                        pos: [1.0, 0.0, 0.0],
-                        color: [1.0, 1.0, 1.0, 1.0],
-                    },
-                    ColorVertex {
-                        pos: [1.0, 1.0, 0.0],
-                        color: [1.0, 1.0, 1.0, 1.0],
-                    },
-                ]),
-                usage: wgpu::BufferUsages::VERTEX,
-            }),
+            models: Vec::new(),
         }
     }
 }
@@ -91,8 +74,30 @@ impl SimpleRenderer {
 impl Renderer for SimpleRenderer {
     fn render<'a>(&'a self, mut render_pass: wgpu::RenderPass<'a>) {
         render_pass.set_pipeline(&self.pipeline);
-        render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-        render_pass.draw(0..3, 0..1);
+        for model in &self.models {
+            render_pass.set_vertex_buffer(0, model.vertex_buffer.slice(..));
+            render_pass.draw(0..3, 0..1);
+        }
+    }
+}
+
+pub struct Model {
+    pub vertex_buffer: Buffer,
+}
+
+impl Model {
+    pub fn new_color(data: &GameData, vertices: &[ColorVertex]) -> Self {
+        Self {
+            vertex_buffer: data
+                .graphics
+                .lock()
+                .device
+                .create_buffer_init(&BufferInitDescriptor {
+                    label: None,
+                    contents: bytemuck::cast_slice(vertices),
+                    usage: wgpu::BufferUsages::VERTEX,
+                }),
+        }
     }
 }
 
