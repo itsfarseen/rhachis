@@ -9,19 +9,19 @@ use wgpu::{
 use crate::{graphics::Renderer, GameData};
 
 pub struct SimpleRenderer {
-    pipeline: RenderPipeline,
+    color_pipeline: RenderPipeline,
     pub models: Vec<Model>,
 }
 
 impl SimpleRenderer {
     pub fn new(data: &GameData) -> Self {
         Self {
-            pipeline: Self::pipeline(data),
+            color_pipeline: Self::color_pipeline(data),
             models: Vec::new(),
         }
     }
 
-    pub fn pipeline(data: &GameData) -> RenderPipeline {
+    pub fn color_pipeline(data: &GameData) -> RenderPipeline {
         let graphics = data.graphics.lock();
 
         let shader = graphics
@@ -78,7 +78,7 @@ impl SimpleRenderer {
 
 impl Renderer for SimpleRenderer {
     fn render<'a>(&'a self, mut render_pass: wgpu::RenderPass<'a>) {
-        render_pass.set_pipeline(&self.pipeline);
+        render_pass.set_pipeline(&self.color_pipeline);
         for model in &self.models {
             render_pass.set_vertex_buffer(0, model.vertex_buffer.slice(..));
             render_pass.set_vertex_buffer(1, model.transform_buffer.slice(..));
