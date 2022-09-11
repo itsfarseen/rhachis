@@ -60,7 +60,12 @@ fn texture_vertex(input: TextureInput, transform: Transform) -> TextureOutput {
     return output;
 }
 
+@group(0)@binding(0)
+var texture: texture_2d<f32>;
+@group(0)@binding(1)
+var texture_sampler: sampler;
+
 @fragment
 fn texture_fragment(output: TextureOutput) -> @location(0) vec4<f32> {
-    return vec4<f32>(output.tex_coords, 1.0, 1.0);
+    return textureSample(texture, texture_sampler, output.tex_coords);
 }

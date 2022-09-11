@@ -4,10 +4,10 @@ use glam::{Mat4, Quat, Vec3};
 use image::{DynamicImage, GenericImageView};
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
-    Buffer, RenderPipeline, Sampler, BindGroup,
+    BindGroup, Buffer, RenderPipeline, Sampler,
 };
 
-use crate::{graphics::{Renderer, self}, GameData};
+use crate::{graphics::Renderer, GameData};
 
 pub struct SimpleRenderer {
     color_pipeline: RenderPipeline,
@@ -27,24 +27,29 @@ impl SimpleRenderer {
     }
 
     pub fn color_pipeline(data: &GameData) -> RenderPipeline {
-        let shader = data.graphics.lock()
-            .device
-            .create_shader_module(wgpu::ShaderModuleDescriptor {
-                label: None,
-                source: wgpu::ShaderSource::Wgsl(include_str!("simple.wgsl").into()),
-            });
+        let shader =
+            data.graphics
+                .lock()
+                .device
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: None,
+                    source: wgpu::ShaderSource::Wgsl(include_str!("simple.wgsl").into()),
+                });
 
-        let color_pipeline_layout = data.graphics.lock().device.create_pipeline_layout(
-            &wgpu::PipelineLayoutDescriptor {
-                label: None,
-                bind_group_layouts: &[],
-                push_constant_ranges: &[],
-            },
-        );
+        let color_pipeline_layout =
+            data.graphics
+                .lock()
+                .device
+                .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                    label: None,
+                    bind_group_layouts: &[],
+                    push_constant_ranges: &[],
+                });
 
         let fragment_format = data.graphics.lock().config.format;
 
-        data.graphics.lock()
+        data.graphics
+            .lock()
             .device
             .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some("Tri Color Pipeline"),
@@ -85,24 +90,29 @@ impl SimpleRenderer {
     pub fn texture_pipeline(data: &GameData) -> RenderPipeline {
         let texture_bind_group_layout = Texture::bind_group_layout(data);
 
-        let shader = data.graphics.lock()
-            .device
-            .create_shader_module(wgpu::ShaderModuleDescriptor {
-                label: None,
-                source: wgpu::ShaderSource::Wgsl(include_str!("simple.wgsl").into()),
-            });
+        let shader =
+            data.graphics
+                .lock()
+                .device
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: None,
+                    source: wgpu::ShaderSource::Wgsl(include_str!("simple.wgsl").into()),
+                });
 
-        let texture_pipeline_layout = data.graphics.lock().device.create_pipeline_layout(
-            &wgpu::PipelineLayoutDescriptor {
-                label: None,
-                bind_group_layouts: &[&texture_bind_group_layout],
-                push_constant_ranges: &[],
-            },
-        );
+        let texture_pipeline_layout =
+            data.graphics
+                .lock()
+                .device
+                .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                    label: None,
+                    bind_group_layouts: &[&texture_bind_group_layout],
+                    push_constant_ranges: &[],
+                });
 
         let fragment_format = data.graphics.lock().config.format;
 
-        data.graphics.lock()
+        data.graphics
+            .lock()
             .device
             .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some("Tri Texture Pipeline"),
@@ -141,23 +151,29 @@ impl SimpleRenderer {
     }
 
     pub fn nearest_sampler(data: &GameData) -> Sampler {
-        data.graphics.lock().device.create_sampler(&wgpu::SamplerDescriptor {
-            address_mode_u: wgpu::AddressMode::Repeat,
-            address_mode_v: wgpu::AddressMode::Repeat,
-            address_mode_w: wgpu::AddressMode::Repeat,
-            mag_filter: wgpu::FilterMode::Nearest,
-            min_filter: wgpu::FilterMode::Nearest,
-            ..Default::default()
-        })
+        data.graphics
+            .lock()
+            .device
+            .create_sampler(&wgpu::SamplerDescriptor {
+                address_mode_u: wgpu::AddressMode::Repeat,
+                address_mode_v: wgpu::AddressMode::Repeat,
+                address_mode_w: wgpu::AddressMode::Repeat,
+                mag_filter: wgpu::FilterMode::Nearest,
+                min_filter: wgpu::FilterMode::Nearest,
+                ..Default::default()
+            })
     }
 }
 
 impl Renderer for SimpleRenderer {
     fn render<'a>(&'a self, mut render_pass: wgpu::RenderPass<'a>) {
         for model in &self.models {
-            match model.vertex_type {
+            match &model.vertex_type {
                 VertexType::ColorVertex => render_pass.set_pipeline(&self.color_pipeline),
-                VertexType::TextureVertex => render_pass.set_pipeline(&self.texture_pipeline),
+                VertexType::TextureVertex(texture) => {
+                    render_pass.set_pipeline(&self.texture_pipeline);
+                    render_pass.set_bind_group(0, &texture.diffuse, &[]);
+                }
             }
             render_pass.set_vertex_buffer(0, model.vertex_buffer.slice(..));
             render_pass.set_vertex_buffer(1, model.transform_buffer.slice(..));
@@ -183,14 +199,14 @@ impl VertexSlice<'_> {
 
 pub enum VertexType {
     ColorVertex,
-    TextureVertex,
+    TextureVertex(Texture),
 }
 
 impl From<VertexSlice<'_>> for VertexType {
     fn from(slice: VertexSlice) -> Self {
         match slice {
             VertexSlice::ColorVertices(..) => Self::ColorVertex,
-            VertexSlice::TextureVertices(..) => Self::TextureVertex,
+            VertexSlice::TextureVertices(_, texture) => Self::TextureVertex(texture),
         }
     }
 }
@@ -335,11 +351,7 @@ pub struct Texture {
 }
 
 impl Texture {
-    pub fn new(
-        data: &GameData,
-        image: &DynamicImage,
-        sampler: &Sampler,
-    ) -> Texture {
+    pub fn new(data: &GameData, image: &DynamicImage, sampler: &Sampler) -> Texture {
         let (width, height) = image.dimensions();
 
         let size = wgpu::Extent3d {
@@ -348,15 +360,19 @@ impl Texture {
             depth_or_array_layers: 1,
         };
 
-        let diffuse_texture = data.graphics.lock().device.create_texture(&wgpu::TextureDescriptor {
-            label: None,
-            size,
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8UnormSrgb,
-            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-        });
+        let diffuse_texture =
+            data.graphics
+                .lock()
+                .device
+                .create_texture(&wgpu::TextureDescriptor {
+                    label: None,
+                    size,
+                    mip_level_count: 1,
+                    sample_count: 1,
+                    dimension: wgpu::TextureDimension::D2,
+                    format: wgpu::TextureFormat::Rgba8UnormSrgb,
+                    usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+                });
 
         data.graphics.lock().queue.write_texture(
             wgpu::ImageCopyTexture {
@@ -376,49 +392,55 @@ impl Texture {
 
         let bind_group_layout = Texture::bind_group_layout(data);
 
-        let diffuse = data.graphics.lock().device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: None,
-            layout: &bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(
-                        &diffuse_texture.create_view(&wgpu::TextureViewDescriptor::default()),
-                    ),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::Sampler(sampler),
-                },
-            ],
-        });
+        let diffuse = data
+            .graphics
+            .lock()
+            .device
+            .create_bind_group(&wgpu::BindGroupDescriptor {
+                label: None,
+                layout: &bind_group_layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: wgpu::BindingResource::TextureView(
+                            &diffuse_texture.create_view(&wgpu::TextureViewDescriptor::default()),
+                        ),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: wgpu::BindingResource::Sampler(sampler),
+                    },
+                ],
+            });
 
         Texture { diffuse }
     }
 
     pub fn bind_group_layout(data: &GameData) -> wgpu::BindGroupLayout {
         let graphics = data.graphics.lock();
-        graphics.device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: None,
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
+        graphics
+            .device
+            .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                label: None,
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            multisampled: false,
+                        },
+                        count: None,
                     },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                    count: None,
-                },
-            ]
-        })
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                ],
+            })
     }
 }
 
