@@ -100,7 +100,7 @@ impl Model {
         data: &GameData,
         vertices: &[ColorVertex],
         indices: &[u16],
-        transform: Transform,
+        transforms: &[[[f32; 4]; 4]],
     ) -> Self {
         let vertex_buffer = data
             .graphics
@@ -126,7 +126,7 @@ impl Model {
                 .device
                 .create_buffer_init(&BufferInitDescriptor {
                     label: None,
-                    contents: bytemuck::cast_slice(&transform.matrix().to_cols_array_2d()),
+                    contents: bytemuck::cast_slice(transforms),
                     usage: wgpu::BufferUsages::VERTEX,
                 });
 
@@ -146,8 +146,8 @@ pub struct Transform {
 }
 
 impl Transform {
-    pub fn matrix(&self) -> Mat4 {
-        Mat4::from_scale_rotation_translation(self.scale, self.rotation, self.translation)
+    pub fn matrix(&self) -> [[f32; 4]; 4] {
+        Mat4::from_scale_rotation_translation(self.scale, self.rotation, self.translation).to_cols_array_2d()
     }
 
     pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
