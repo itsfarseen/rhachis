@@ -1,6 +1,6 @@
 use std::mem::size_of;
 
-use glam::{Vec3, Quat, Mat4};
+use glam::{Mat4, Quat, Vec3};
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
     Buffer, RenderPipeline,
@@ -85,7 +85,7 @@ impl Renderer for SimpleRenderer {
 
 pub struct Model {
     pub vertex_buffer: Buffer,
-    pub transform_buffer: Buffer
+    pub transform_buffer: Buffer,
 }
 
 impl Model {
@@ -99,15 +99,15 @@ impl Model {
                 contents: bytemuck::cast_slice(vertices),
                 usage: wgpu::BufferUsages::VERTEX,
             });
-        let transform_buffer = data
-            .graphics
-            .lock()
-            .device
-            .create_buffer_init(&BufferInitDescriptor {
-                label: None,
-                contents: bytemuck::cast_slice(&transform.matrix().to_cols_array_2d()),
-                usage: wgpu::BufferUsages::VERTEX,
-            });
+        let transform_buffer =
+            data.graphics
+                .lock()
+                .device
+                .create_buffer_init(&BufferInitDescriptor {
+                    label: None,
+                    contents: bytemuck::cast_slice(&transform.matrix().to_cols_array_2d()),
+                    usage: wgpu::BufferUsages::VERTEX,
+                });
 
         Self {
             vertex_buffer,
@@ -152,7 +152,7 @@ impl Transform {
                     offset: size_of::<[f32; 12]>() as u64,
                     shader_location: 5,
                 },
-            ]
+            ],
         }
     }
 }
