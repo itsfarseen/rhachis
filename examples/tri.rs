@@ -14,7 +14,7 @@ struct Tri {
 
 impl Game for Tri {
     fn init(data: &GameData) -> Self {
-        let mut renderer = SimpleRenderer::new(data);
+        let mut renderer = SimpleRenderer::new(data, glam::Mat4::IDENTITY);
         renderer.models.push(Model::new(
             data,
             VertexSlice::ColorVertices(&[

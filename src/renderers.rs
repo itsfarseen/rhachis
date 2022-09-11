@@ -12,15 +12,52 @@ use crate::{graphics::Renderer, GameData};
 pub struct SimpleRenderer {
     color_pipeline: RenderPipeline,
     texture_pipeline: RenderPipeline,
+    projection_bind_group: BindGroup,
     pub nearest_sampler: Sampler,
     pub models: Vec<Model>,
 }
 
 impl SimpleRenderer {
-    pub fn new(data: &GameData) -> Self {
+    pub fn new(data: &GameData, projection: Mat4) -> Self {
+        let projection_bind_group_layout = data.graphics.lock().device.create_bind_group_layout(
+            &wgpu::BindGroupLayoutDescriptor {
+                label: None,
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::VERTEX,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    }
+                ]
+            }
+        );
+
+        let projection_buffer = data.graphics.lock().device.create_buffer_init(&BufferInitDescriptor {
+            label: None,
+            contents: bytemuck::cast_slice(&[projection.to_cols_array_2d()]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+
+        let projection_bind_group = data.graphics.lock().device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: None,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: projection_buffer.as_entire_binding(),
+                }
+            ],
+            layout: &projection_bind_group_layout,
+        });
+
         Self {
             color_pipeline: Self::color_pipeline(data),
             texture_pipeline: Self::texture_pipeline(data),
+            projection_bind_group,
             nearest_sampler: Self::nearest_sampler(data),
             models: Vec::new(),
         }

@@ -1,3 +1,4 @@
+use glam::Mat4;
 use rhachis::{
     renderers::{Model, SimpleRenderer, Texture, TextureVertex, Transform, VertexSlice},
     Game, GameExt,
@@ -13,7 +14,7 @@ struct Image {
 
 impl Game for Image {
     fn init(data: &rhachis::GameData) -> Self {
-        let mut renderer = SimpleRenderer::new(data);
+        let mut renderer = SimpleRenderer::new(data, Mat4::IDENTITY);
         renderer.models.push(Model::new(
             data,
             VertexSlice::TextureVertices(
