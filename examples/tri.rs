@@ -1,6 +1,6 @@
 use rhachis::{
     graphics::Renderer,
-    renderers::{ColorVertex, Model, SimpleRenderer, Transform},
+    renderers::{ColorVertex, Model, SimpleRenderer, Transform, VertexSlice},
     *,
 };
 
@@ -15,9 +15,9 @@ struct Tri {
 impl Game for Tri {
     fn init(data: &GameData) -> Self {
         let mut renderer = SimpleRenderer::new(data);
-        renderer.models.push(Model::new_color(
+        renderer.models.push(Model::new(
             data,
-            &[
+            VertexSlice::ColorVertices(&[
                 ColorVertex {
                     pos: [0.0, 0.0, 0.0],
                     color: [1.0, 0.0, 0.0, 1.0],
@@ -30,7 +30,7 @@ impl Game for Tri {
                     pos: [1.0, 1.0, 0.0],
                     color: [1.0, 0.0, 0.0, 1.0],
                 },
-            ],
+            ]),
             &[0, 1, 2],
             &[Transform::default().matrix()],
         ));

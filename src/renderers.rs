@@ -144,6 +144,20 @@ impl Renderer for SimpleRenderer {
     }
 }
 
+pub enum VertexSlice<'a> {
+    ColorVertices(&'a [ColorVertex]),
+    TextureVertices(&'a [TextureVertex]),
+}
+
+impl VertexSlice<'_> {
+    pub fn contents(&self) -> &[u8] {
+        match *self {
+            Self::ColorVertices(vertices) => bytemuck::cast_slice(vertices),
+            Self::TextureVertices(vertices) => bytemuck::cast_slice(vertices),
+        }
+    }
+}
+
 pub struct Model {
     pub vertex_buffer: Buffer,
     pub index_buffer: Buffer,
@@ -153,9 +167,9 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn new_color(
+    pub fn new(
         data: &GameData,
-        vertices: &[ColorVertex],
+        vertices: VertexSlice,
         indices: &[u16],
         transforms: &[[[f32; 4]; 4]],
     ) -> Self {
@@ -165,7 +179,7 @@ impl Model {
             .device
             .create_buffer_init(&BufferInitDescriptor {
                 label: None,
-                contents: bytemuck::cast_slice(vertices),
+                contents: vertices.contents(),
                 usage: wgpu::BufferUsages::VERTEX,
             });
         let index_buffer = data
