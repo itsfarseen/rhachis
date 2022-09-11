@@ -15,6 +15,13 @@ pub struct SimpleRenderer {
 
 impl SimpleRenderer {
     pub fn new(data: &GameData) -> Self {
+        Self {
+            pipeline: Self::pipeline(data),
+            models: Vec::new(),
+        }
+    }
+
+    pub fn pipeline(data: &GameData) -> RenderPipeline {
         let graphics = data.graphics.lock();
 
         let shader = graphics
@@ -24,51 +31,48 @@ impl SimpleRenderer {
                 source: wgpu::ShaderSource::Wgsl(include_str!("simple.wgsl").into()),
             });
 
-        Self {
-            pipeline: graphics
-                .device
-                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                    label: Some("Tri Pipeline"),
-                    layout: Some(&graphics.device.create_pipeline_layout(
-                        &wgpu::PipelineLayoutDescriptor {
-                            label: None,
-                            bind_group_layouts: &[],
-                            push_constant_ranges: &[],
-                        },
-                    )),
-                    vertex: wgpu::VertexState {
-                        module: &shader,
-                        entry_point: "color_vertex",
-                        buffers: &[ColorVertex::desc(), Transform::desc()],
+        graphics
+            .device
+            .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: Some("Tri Pipeline"),
+                layout: Some(&graphics.device.create_pipeline_layout(
+                    &wgpu::PipelineLayoutDescriptor {
+                        label: None,
+                        bind_group_layouts: &[],
+                        push_constant_ranges: &[],
                     },
-                    fragment: Some(wgpu::FragmentState {
-                        module: &shader,
-                        entry_point: "color_fragment",
-                        targets: &[Some(wgpu::ColorTargetState {
-                            format: graphics.config.format,
-                            blend: Some(wgpu::BlendState::ALPHA_BLENDING),
-                            write_mask: wgpu::ColorWrites::ALL,
-                        })],
-                    }),
-                    primitive: wgpu::PrimitiveState {
-                        topology: wgpu::PrimitiveTopology::TriangleList,
-                        strip_index_format: None,
-                        front_face: wgpu::FrontFace::Ccw,
-                        cull_mode: Some(wgpu::Face::Back),
-                        unclipped_depth: false,
-                        polygon_mode: wgpu::PolygonMode::Fill,
-                        conservative: false,
-                    },
-                    depth_stencil: None,
-                    multisample: wgpu::MultisampleState {
-                        count: 1,
-                        mask: !0,
-                        alpha_to_coverage_enabled: false,
-                    },
-                    multiview: None,
+                )),
+                vertex: wgpu::VertexState {
+                    module: &shader,
+                    entry_point: "color_vertex",
+                    buffers: &[ColorVertex::desc(), Transform::desc()],
+                },
+                fragment: Some(wgpu::FragmentState {
+                    module: &shader,
+                    entry_point: "color_fragment",
+                    targets: &[Some(wgpu::ColorTargetState {
+                        format: graphics.config.format,
+                        blend: Some(wgpu::BlendState::ALPHA_BLENDING),
+                        write_mask: wgpu::ColorWrites::ALL,
+                    })],
                 }),
-            models: Vec::new(),
-        }
+                primitive: wgpu::PrimitiveState {
+                    topology: wgpu::PrimitiveTopology::TriangleList,
+                    strip_index_format: None,
+                    front_face: wgpu::FrontFace::Ccw,
+                    cull_mode: Some(wgpu::Face::Back),
+                    unclipped_depth: false,
+                    polygon_mode: wgpu::PolygonMode::Fill,
+                    conservative: false,
+                },
+                depth_stencil: None,
+                multisample: wgpu::MultisampleState {
+                    count: 1,
+                    mask: !0,
+                    alpha_to_coverage_enabled: false,
+                },
+                multiview: None,
+            })
     }
 }
 
