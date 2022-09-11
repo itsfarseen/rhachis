@@ -1,6 +1,6 @@
 use rhachis::{
     graphics::Renderer,
-    renderers::{ColorVertex, Model, SimpleRenderer},
+    renderers::{ColorVertex, Model, SimpleRenderer, Transform},
     *,
 };
 
@@ -31,6 +31,7 @@ impl Game for Tri {
                     color: [1.0, 0.0, 0.0, 1.0],
                 },
             ],
+            Transform::default(),
         ));
 
         Tri { renderer }
