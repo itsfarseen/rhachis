@@ -82,18 +82,26 @@ impl Renderer for SimpleRenderer {
         for model in &self.models {
             render_pass.set_vertex_buffer(0, model.vertex_buffer.slice(..));
             render_pass.set_vertex_buffer(1, model.transform_buffer.slice(..));
-            render_pass.draw(0..3, 0..1);
+            render_pass.set_index_buffer(model.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+            render_pass.draw_indexed(0..model.index_count, 0, 0..1);
         }
     }
 }
 
 pub struct Model {
     pub vertex_buffer: Buffer,
+    pub index_buffer: Buffer,
+    pub index_count: u32,
     pub transform_buffer: Buffer,
 }
 
 impl Model {
-    pub fn new_color(data: &GameData, vertices: &[ColorVertex], transform: Transform) -> Self {
+    pub fn new_color(
+        data: &GameData,
+        vertices: &[ColorVertex],
+        indices: &[u16],
+        transform: Transform,
+    ) -> Self {
         let vertex_buffer = data
             .graphics
             .lock()
@@ -102,6 +110,15 @@ impl Model {
                 label: None,
                 contents: bytemuck::cast_slice(vertices),
                 usage: wgpu::BufferUsages::VERTEX,
+            });
+        let index_buffer = data
+            .graphics
+            .lock()
+            .device
+            .create_buffer_init(&BufferInitDescriptor {
+                label: None,
+                contents: bytemuck::cast_slice(indices),
+                usage: wgpu::BufferUsages::INDEX,
             });
         let transform_buffer =
             data.graphics
@@ -115,6 +132,8 @@ impl Model {
 
         Self {
             vertex_buffer,
+            index_buffer,
+            index_count: indices.len() as u32,
             transform_buffer,
         }
     }
