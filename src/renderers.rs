@@ -83,7 +83,7 @@ impl Renderer for SimpleRenderer {
             render_pass.set_vertex_buffer(0, model.vertex_buffer.slice(..));
             render_pass.set_vertex_buffer(1, model.transform_buffer.slice(..));
             render_pass.set_index_buffer(model.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-            render_pass.draw_indexed(0..model.index_count, 0, 0..1);
+            render_pass.draw_indexed(0..model.index_count, 0, 0..model.transform_count);
         }
     }
 }
@@ -93,6 +93,7 @@ pub struct Model {
     pub index_buffer: Buffer,
     pub index_count: u32,
     pub transform_buffer: Buffer,
+    pub transform_count: u32,
 }
 
 impl Model {
@@ -135,6 +136,7 @@ impl Model {
             index_buffer,
             index_count: indices.len() as u32,
             transform_buffer,
+            transform_count: transforms.len() as u32,
         }
     }
 }
@@ -147,12 +149,13 @@ pub struct Transform {
 
 impl Transform {
     pub fn matrix(&self) -> [[f32; 4]; 4] {
-        Mat4::from_scale_rotation_translation(self.scale, self.rotation, self.translation).to_cols_array_2d()
+        Mat4::from_scale_rotation_translation(self.scale, self.rotation, self.translation)
+            .to_cols_array_2d()
     }
 
     pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
         wgpu::VertexBufferLayout {
-            array_stride: size_of::<Self>() as u64,
+            array_stride: size_of::<[[f32; 4]; 4]>() as u64,
             step_mode: wgpu::VertexStepMode::Instance,
             attributes: &[
                 wgpu::VertexAttribute {
