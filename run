@@ -1,5 +1,5 @@
 [default]
-cargo run --example tri
+cargo run --example image
 
 [check]
 cargo clippy --examples && cargo fmt
