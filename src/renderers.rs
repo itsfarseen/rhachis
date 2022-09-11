@@ -134,8 +134,11 @@ impl SimpleRenderer {
 
 impl Renderer for SimpleRenderer {
     fn render<'a>(&'a self, mut render_pass: wgpu::RenderPass<'a>) {
-        render_pass.set_pipeline(&self.color_pipeline);
         for model in &self.models {
+            match model.vertex_type {
+                VertexType::ColorVertex => render_pass.set_pipeline(&self.color_pipeline),
+                VertexType::TextureVertex => render_pass.set_pipeline(&self.texture_pipeline),
+            }
             render_pass.set_vertex_buffer(0, model.vertex_buffer.slice(..));
             render_pass.set_vertex_buffer(1, model.transform_buffer.slice(..));
             render_pass.set_index_buffer(model.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
@@ -158,8 +161,23 @@ impl VertexSlice<'_> {
     }
 }
 
+pub enum VertexType {
+    ColorVertex,
+    TextureVertex,
+}
+
+impl From<VertexSlice<'_>> for VertexType {
+    fn from(slice: VertexSlice) -> Self {
+        match slice {
+            VertexSlice::ColorVertices(..) => Self::ColorVertex,
+            VertexSlice::TextureVertices(..) => Self::TextureVertex,
+        }
+    }
+}
+
 pub struct Model {
     pub vertex_buffer: Buffer,
+    pub vertex_type: VertexType,
     pub index_buffer: Buffer,
     pub index_count: u32,
     pub transform_buffer: Buffer,
@@ -203,6 +221,7 @@ impl Model {
 
         Self {
             vertex_buffer,
+            vertex_type: vertices.into(),
             index_buffer,
             index_count: indices.len() as u32,
             transform_buffer,
