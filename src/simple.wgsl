@@ -25,6 +25,9 @@ struct TextureOutput {
     @location(0) tex_coords: vec2<f32>,
 }
 
+@group(0)@binding(0)
+var<uniform> projection: mat4x4<f32>;
+
 @vertex
 fn color_vertex(input: ColorInput, transform: Transform) -> ColorOutput {
     let transform_matrix = mat4x4<f32>(
@@ -35,7 +38,7 @@ fn color_vertex(input: ColorInput, transform: Transform) -> ColorOutput {
     );
 
     var output: ColorOutput;
-    output.pos = transform_matrix * vec4<f32>(input.pos, 1.0);
+    output.pos = projection * transform_matrix * vec4<f32>(input.pos, 1.0);
     output.color = input.color;
     return output;
 }
@@ -55,14 +58,14 @@ fn texture_vertex(input: TextureInput, transform: Transform) -> TextureOutput {
     );
 
     var output: TextureOutput;
-    output.pos = transform_matrix * vec4<f32>(input.pos, 1.0);
+    output.pos = projection * transform_matrix * vec4<f32>(input.pos, 1.0);
     output.tex_coords = input.tex_coords;
     return output;
 }
 
-@group(0)@binding(0)
+@group(1)@binding(0)
 var texture: texture_2d<f32>;
-@group(0)@binding(1)
+@group(1)@binding(1)
 var texture_sampler: sampler;
 
 @fragment

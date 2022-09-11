@@ -19,23 +19,7 @@ pub struct SimpleRenderer {
 
 impl SimpleRenderer {
     pub fn new(data: &GameData, projection: Mat4) -> Self {
-        let projection_bind_group_layout = data.graphics.lock().device.create_bind_group_layout(
-            &wgpu::BindGroupLayoutDescriptor {
-                label: None,
-                entries: &[
-                    wgpu::BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: wgpu::ShaderStages::VERTEX,
-                        ty: wgpu::BindingType::Buffer {
-                            ty: wgpu::BufferBindingType::Uniform,
-                            has_dynamic_offset: false,
-                            min_binding_size: None,
-                        },
-                        count: None,
-                    }
-                ]
-            }
-        );
+        let projection_bind_group_layout = Self::mat4_bind_group_layout(data);
 
         let projection_buffer = data.graphics.lock().device.create_buffer_init(&BufferInitDescriptor {
             label: None,
@@ -73,13 +57,15 @@ impl SimpleRenderer {
                     source: wgpu::ShaderSource::Wgsl(include_str!("simple.wgsl").into()),
                 });
 
+        let mat4_bind_group_layout = Self::mat4_bind_group_layout(data);
+
         let color_pipeline_layout =
             data.graphics
                 .lock()
                 .device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: None,
-                    bind_group_layouts: &[],
+                    bind_group_layouts: &[&mat4_bind_group_layout],
                     push_constant_ranges: &[],
                 });
 
@@ -136,13 +122,15 @@ impl SimpleRenderer {
                     source: wgpu::ShaderSource::Wgsl(include_str!("simple.wgsl").into()),
                 });
 
+        let mat4_bind_group_layout = Self::mat4_bind_group_layout(data);
+
         let texture_pipeline_layout =
             data.graphics
                 .lock()
                 .device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: None,
-                    bind_group_layouts: &[&texture_bind_group_layout],
+                    bind_group_layouts: &[&mat4_bind_group_layout, &texture_bind_group_layout],
                     push_constant_ranges: &[],
                 });
 
@@ -200,16 +188,37 @@ impl SimpleRenderer {
                 ..Default::default()
             })
     }
+    
+    pub fn mat4_bind_group_layout(data: &GameData) -> wgpu::BindGroupLayout {
+        data.graphics.lock().device.create_bind_group_layout(
+            &wgpu::BindGroupLayoutDescriptor {
+                label: None,
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::VERTEX,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    }
+                ]
+            }
+        )
+    }
 }
 
 impl Renderer for SimpleRenderer {
     fn render<'a>(&'a self, mut render_pass: wgpu::RenderPass<'a>) {
+        render_pass.set_bind_group(0, &self.projection_bind_group, &[]);
         for model in &self.models {
             match &model.vertex_type {
                 VertexType::ColorVertex => render_pass.set_pipeline(&self.color_pipeline),
                 VertexType::TextureVertex(texture) => {
                     render_pass.set_pipeline(&self.texture_pipeline);
-                    render_pass.set_bind_group(0, &texture.diffuse, &[]);
+                    render_pass.set_bind_group(1, &texture.diffuse, &[]);
                 }
             }
             render_pass.set_vertex_buffer(0, model.vertex_buffer.slice(..));
