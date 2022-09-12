@@ -42,7 +42,7 @@ impl Game for Image {
                 Texture::new(
                     data,
                     &image::open("examples/test.png").unwrap(),
-                    &renderer.nearest_sampler,
+                    &renderer.linear_sampler,
                 ),
             ),
             &[0, 1, 2, 1, 3, 2],

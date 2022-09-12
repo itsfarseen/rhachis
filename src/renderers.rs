@@ -14,6 +14,7 @@ pub struct SimpleRenderer {
     texture_pipeline: RenderPipeline,
     projection_bind_group: BindGroup,
     pub nearest_sampler: Sampler,
+    pub linear_sampler: Sampler,
     pub models: Vec<Model>,
 }
 
@@ -49,6 +50,7 @@ impl SimpleRenderer {
             texture_pipeline: Self::texture_pipeline(data),
             projection_bind_group,
             nearest_sampler: Self::nearest_sampler(data),
+            linear_sampler: Self::linear_sampler(data),
             models: Vec::new(),
         }
     }
@@ -178,6 +180,20 @@ impl SimpleRenderer {
                     alpha_to_coverage_enabled: false,
                 },
                 multiview: None,
+            })
+    }
+
+    pub fn linear_sampler(data: &GameData) -> Sampler {
+        data.graphics
+            .lock()
+            .device
+            .create_sampler(&wgpu::SamplerDescriptor {
+                address_mode_u: wgpu::AddressMode::Repeat,
+                address_mode_v: wgpu::AddressMode::Repeat,
+                address_mode_w: wgpu::AddressMode::Repeat,
+                mag_filter: wgpu::FilterMode::Linear,
+                min_filter: wgpu::FilterMode::Linear,
+                ..Default::default()
             })
     }
 
