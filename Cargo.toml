@@ -15,3 +15,4 @@ paste = "1.0.9"
 tobj = "3.2.3"
 anyhow = "1.0.64"
 run-macro = { path = "run-macro" }
+iter_tools = "0.1.4"

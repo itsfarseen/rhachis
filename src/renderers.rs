@@ -363,15 +363,6 @@ impl Model {
         let to_ret = models
             .into_iter()
             .map(|model| {
-                let vertices = model
-                    .mesh
-                    .positions
-                    .chunks(3)
-                    .map(|pos| ColorVertex {
-                        pos: [pos[0], pos[1], pos[2]],
-                        color: [1.0, 1.0, 1.0, 1.0],
-                    })
-                    .collect::<Vec<ColorVertex>>();
                 let indices = model
                     .mesh
                     .indices
@@ -379,12 +370,44 @@ impl Model {
                     .map(|x| x as u16)
                     .collect::<Vec<u16>>();
 
-                Self::new(
-                    data,
-                    VertexSlice::ColorVertices(&vertices),
-                    &indices,
-                    vec![Transform::default()],
-                )
+                match model.mesh.material_id {
+                    Some(..) => {
+                        let positions = model.mesh.positions.chunks(3);
+                        let tex_coords = model.mesh.texcoords.chunks(2);
+
+                        let vertices = iter_tools::zip(positions, tex_coords)
+                            .map(|(pos, tex_coords)| TextureVertex {
+                                pos: [pos[0], pos[1], pos[2]],
+                                tex_coords: [tex_coords[0], tex_coords[1]],
+                            })
+                            .collect::<Vec<TextureVertex>>();
+
+                        Self::new(
+                            data,
+                            VertexSlice::TextureVertices(&vertices, todo!("Texture")),
+                            &indices,
+                            vec![Transform::default()],
+                        )
+                    }
+                    None => {
+                        let vertices = model
+                            .mesh
+                            .positions
+                            .chunks(3)
+                            .map(|pos| ColorVertex {
+                                pos: [pos[0], pos[1], pos[2]],
+                                color: [1.0, 1.0, 1.0, 1.0],
+                            })
+                            .collect::<Vec<ColorVertex>>();
+
+                        Self::new(
+                            data,
+                            VertexSlice::ColorVertices(&vertices),
+                            &indices,
+                            vec![Transform::default()],
+                        )
+                    }
+                }
             })
             .collect();
 
