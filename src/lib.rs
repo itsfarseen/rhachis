@@ -2,6 +2,8 @@ pub mod graphics;
 pub mod input;
 pub mod renderers;
 
+use std::sync::Arc;
+
 use graphics::{Graphics, Renderer};
 use input::Input;
 use parking_lot::Mutex;
@@ -14,9 +16,9 @@ use winit::{
 pub use run_macro::run;
 
 pub struct GameData {
-    pub graphics: Mutex<Graphics>,
-    pub input: Mutex<Input>,
-    pub window: Mutex<Window>,
+    pub graphics: Arc<Mutex<Graphics>>,
+    pub input: Arc<Mutex<Input>>,
+    pub window: Arc<Mutex<Window>>,
 }
 
 pub trait Game {
@@ -38,9 +40,9 @@ where
         let window = WindowBuilder::new().build(&event_loop).unwrap();
 
         let data = GameData {
-            graphics: Mutex::new(pollster::block_on(Graphics::new(&window))),
-            input: Mutex::new(Input::new()),
-            window: Mutex::new(window),
+            graphics: Arc::new(Mutex::new(pollster::block_on(Graphics::new(&window)))),
+            input: Arc::new(Mutex::new(Input::new())),
+            window: Arc::new(Mutex::new(window)),
         };
 
         let mut game = Self::init(&data);
