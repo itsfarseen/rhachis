@@ -405,6 +405,39 @@ impl Model {
         );
         self.transforms_outdated = false;
     }
+
+    pub fn set_transform(&mut self, index: usize, transform: Transform) {
+        *self.transforms.get_mut(index).unwrap() = transform;
+        self.transforms_outdated = true;
+    }
+
+    pub fn with_transform(mut self, index: usize, transform: Transform) -> Self {
+        *self.transforms.get_mut(index).unwrap() = transform;
+        self.transforms_outdated = true;
+        self
+    }
+
+    pub fn set_transforms(&mut self, transforms: Vec<Transform>) {
+        self.transforms = transforms;
+        self.transforms_outdated = true;
+    }
+
+    pub fn with_transforms(mut self, transforms: Vec<Transform>) -> Self {
+        self.transforms = transforms;
+        self.transforms_outdated = true;
+        self
+    }
+
+    pub fn modify_transforms<F: FnOnce(&mut [Transform])>(&mut self, modify: F) {
+        modify(&mut self.transforms);
+        self.transforms_outdated = true;
+    }
+
+    pub fn with_modify_transforms<F: FnOnce(&mut [Transform])>(mut self, modify: F) -> Self {
+        modify(&mut self.transforms);
+        self.transforms_outdated = true;
+        self
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
