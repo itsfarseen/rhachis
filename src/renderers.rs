@@ -1,5 +1,6 @@
-use std::{mem::size_of, num::NonZeroU32};
+use std::{fmt::Debug, mem::size_of, num::NonZeroU32, path::Path};
 
+use anyhow::Result;
 use glam::{Mat4, Quat, Vec3};
 use image::{DynamicImage, GenericImageView};
 use wgpu::{
@@ -330,6 +331,47 @@ impl Model {
             transform_buffer,
             transform_count: transforms.len() as u32,
         }
+    }
+
+    pub fn from_obj<P: AsRef<Path> + Debug>(data: &GameData, path: P) -> Result<Vec<Self>> {
+        let (models, materials) = tobj::load_obj(
+            path,
+            &tobj::LoadOptions {
+                triangulate: true,
+                single_index: true,
+                ..Default::default()
+            },
+        )?;
+
+        let to_ret = models
+            .into_iter()
+            .map(|model| {
+                let vertices = model
+                    .mesh
+                    .positions
+                    .chunks(3)
+                    .map(|pos| ColorVertex {
+                        pos: [pos[0], pos[1], pos[2]],
+                        color: [1.0, 1.0, 1.0, 1.0],
+                    })
+                    .collect::<Vec<ColorVertex>>();
+                let indices = model
+                    .mesh
+                    .indices
+                    .into_iter()
+                    .map(|x| x as u16)
+                    .collect::<Vec<u16>>();
+
+                Self::new(
+                    data,
+                    VertexSlice::ColorVertices(&vertices),
+                    &indices,
+                    &[Transform::default().matrix()],
+                )
+            })
+            .collect();
+
+        Ok(to_ret)
     }
 }
 
