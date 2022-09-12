@@ -1,0 +1,11 @@
+[package]
+name = "run-macro"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+proc-macro2 = "1.0.43"
+quote = "1.0.21"
+
+[lib]
+proc-macro = true

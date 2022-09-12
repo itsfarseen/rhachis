@@ -11,6 +11,8 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
+pub use run_macro::run;
+
 pub struct GameData {
     pub graphics: Mutex<Graphics>,
     pub input: Mutex<Input>,

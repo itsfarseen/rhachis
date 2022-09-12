@@ -3,8 +3,6 @@ name = "rhachis"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 bytemuck = { version = "1.12.1", features = ["derive"] }
 glam = "0.21.3"
@@ -16,3 +14,4 @@ image = "0.24.2"
 paste = "1.0.9"
 tobj = "3.2.3"
 anyhow = "1.0.64"
+run-macro = { path = "run-macro" }

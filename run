@@ -1,5 +1,5 @@
 [default]
-cargo run --example obj
+cargo run --example window
 
 [check]
 cargo clippy --examples && cargo fmt
