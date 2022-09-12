@@ -116,7 +116,10 @@ pub enum InputState {
 /// layout.
 #[derive(Clone, Copy, Debug)]
 pub enum Key {
+    Backspace,
     Escape,
+    Tab,
+
     Num(u8),
     Char(char),
     Other(ScanCode),
@@ -135,6 +138,10 @@ impl From<Key> for ScanCode {
                     panic!("Invalid key number {num}");
                 }
             }
+            Key::Char('-') => 12,
+            Key::Char('=') => 13,
+            Key::Backspace => 14,
+            Key::Tab | Key::Char('\t') => 15,
             Key::Char('q') => 16,
             Key::Char('w') => 17,
             Key::Char('e') => 18,
@@ -192,8 +199,10 @@ impl From<Key> for ScanCode {
             Key::Num(4) => 21,
             Key::Num(6) => 22,
             Key::Num(5) => 23,
+            Key::Char('=') => 24,
             Key::Num(9) => 25,
             Key::Num(7) => 26,
+            Key::Char('-') => 27,
             Key::Num(8) => 28,
             Key::Num(0) => 29,
             Key::Char('o') => 31,
@@ -205,6 +214,8 @@ impl From<Key> for ScanCode {
             Key::Char('k') => 40,
             Key::Char('n') => 45,
             Key::Char('m') => 46,
+            Key::Tab | Key::Char('\t') => 48,
+            Key::Backspace => 51,
             Key::Escape => 53,
             Key::Other(scancode) => scancode,
 
@@ -225,6 +236,10 @@ impl From<Key> for ScanCode {
                     panic!("Invalid key number {num}")
                 }
             }
+            Key::Char('-') => 12,
+            Key::Char('=') => 13,
+            Key::Backspace => 14,
+            Key::Tab | Key::Char('\t') => 15,
             Key::Char('q') => 16,
             Key::Char('w') => 17,
             Key::Char('e') => 18,
