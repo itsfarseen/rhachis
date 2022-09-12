@@ -335,7 +335,7 @@ impl Model {
                             .map(Transform::matrix)
                             .collect::<Vec<[[f32; 4]; 4]>>(),
                     ),
-                    usage: wgpu::BufferUsages::VERTEX,
+                    usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
                 });
 
         Self {

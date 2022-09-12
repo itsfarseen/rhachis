@@ -47,7 +47,7 @@ impl Game for Image {
             ),
             &[0, 1, 2, 1, 3, 2],
             vec![Transform::default()],
-        ));
+        ).with_transform(0, Transform::scale((0.5, 0.5, 1.0).into())));
 
         Self { renderer }
     }

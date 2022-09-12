@@ -46,6 +46,7 @@ where
         event_loop.run(move |event, _, control_flow| match event {
             Event::MainEventsCleared => {
                 game.update(&data);
+                game.get_renderer().update(&data);
                 data.input.lock().update();
                 data.window.lock().request_redraw();
             }

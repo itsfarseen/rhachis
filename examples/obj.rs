@@ -2,7 +2,7 @@ use std::f32::consts::TAU;
 
 use glam::Mat4;
 use rhachis::{
-    renderers::{Model, SimpleRenderer},
+    renderers::{Model, SimpleRenderer, Transform},
     Game, GameExt,
 };
 
@@ -31,7 +31,8 @@ impl Game for Obj {
             Model::from_obj(data, "examples/test.obj")
                 .unwrap()
                 .pop()
-                .unwrap(),
+                .unwrap()
+                .with_transforms(vec![Transform::translation((3.0, 0.0, 3.0).into())]),
         );
 
         Self { renderer }
