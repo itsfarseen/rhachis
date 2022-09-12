@@ -1,6 +1,6 @@
 use rhachis::{graphics::EmptyRenderer, *};
 
-#[rhachis::run()]
+#[rhachis::run]
 struct Window(EmptyRenderer);
 
 impl Game for Window {
