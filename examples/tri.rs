@@ -32,7 +32,7 @@ impl Game for Tri {
                 },
             ]),
             &[0, 1, 2],
-            &[Transform::default().matrix()],
+            vec![Transform::default()],
         ));
 
         Tri { renderer }

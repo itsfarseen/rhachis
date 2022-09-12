@@ -249,6 +249,14 @@ impl Renderer for SimpleRenderer {
             render_pass.draw_indexed(0..model.index_count, 0, 0..model.transform_count);
         }
     }
+
+    fn update(&mut self, data: &GameData) {
+        for model in &mut self.models {
+            if model.transforms_outdated {
+                model.update_transforms(data);
+            }
+        }
+    }
 }
 
 pub enum VertexSlice<'a> {
@@ -284,6 +292,8 @@ pub struct Model {
     pub vertex_type: VertexType,
     pub index_buffer: Buffer,
     pub index_count: u32,
+    pub transforms: Vec<Transform>,
+    transforms_outdated: bool,
     pub transform_buffer: Buffer,
     pub transform_count: u32,
 }
@@ -293,7 +303,7 @@ impl Model {
         data: &GameData,
         vertices: VertexSlice,
         indices: &[u16],
-        transforms: &[[[f32; 4]; 4]],
+        transforms: Vec<Transform>,
     ) -> Self {
         let vertex_buffer = data
             .graphics
@@ -319,7 +329,12 @@ impl Model {
                 .device
                 .create_buffer_init(&BufferInitDescriptor {
                     label: None,
-                    contents: bytemuck::cast_slice(transforms),
+                    contents: bytemuck::cast_slice(
+                        &transforms
+                            .iter()
+                            .map(Transform::matrix)
+                            .collect::<Vec<[[f32; 4]; 4]>>(),
+                    ),
                     usage: wgpu::BufferUsages::VERTEX,
                 });
 
@@ -328,8 +343,10 @@ impl Model {
             vertex_type: vertices.into(),
             index_buffer,
             index_count: indices.len() as u32,
-            transform_buffer,
             transform_count: transforms.len() as u32,
+            transforms,
+            transforms_outdated: false,
+            transform_buffer,
         }
     }
 
@@ -366,12 +383,27 @@ impl Model {
                     data,
                     VertexSlice::ColorVertices(&vertices),
                     &indices,
-                    &[Transform::default().matrix()],
+                    vec![Transform::default()],
                 )
             })
             .collect();
 
         Ok(to_ret)
+    }
+
+    pub fn update_transforms(&mut self, data: &GameData) {
+        data.graphics.lock().queue.write_buffer(
+            &self.transform_buffer,
+            0,
+            bytemuck::cast_slice(
+                &self
+                    .transforms
+                    .iter()
+                    .map(Transform::matrix)
+                    .collect::<Vec<[[f32; 4]; 4]>>(),
+            ),
+        );
+        self.transforms_outdated = false;
     }
 }
 

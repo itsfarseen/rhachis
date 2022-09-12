@@ -46,7 +46,7 @@ impl Game for Image {
                 ),
             ),
             &[0, 1, 2, 1, 3, 2],
-            &[Transform::default().matrix()],
+            vec![Transform::default()],
         ));
 
         Self { renderer }

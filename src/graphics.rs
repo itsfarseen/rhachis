@@ -1,6 +1,8 @@
 use wgpu::{CommandEncoder, Device, Queue, RenderPass, Surface, SurfaceConfiguration, TextureView};
 use winit::{dpi::PhysicalSize, window::Window};
 
+use crate::GameData;
+
 pub struct Graphics {
     pub device: Device,
     pub queue: Queue,
@@ -99,6 +101,7 @@ pub trait Renderer {
     }
 
     fn render(&self, _: RenderPass) {}
+    fn update(&mut self, _: &GameData) {}
 }
 
 pub struct EmptyRenderer;
