@@ -6,10 +6,7 @@ use rhachis::{
     Game, GameExt,
 };
 
-fn main() {
-    Obj::run();
-}
-
+#[rhachis::run]
 struct Obj {
     renderer: SimpleRenderer,
 }

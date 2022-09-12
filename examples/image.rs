@@ -4,10 +4,7 @@ use rhachis::{
     Game, GameExt,
 };
 
-fn main() {
-    Image::run();
-}
-
+#[rhachis::run]
 struct Image {
     renderer: SimpleRenderer,
 }

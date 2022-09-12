@@ -4,10 +4,7 @@ use rhachis::{
     *,
 };
 
-fn main() {
-    Tri::run();
-}
-
+#[rhachis::run]
 struct Tri {
     renderer: SimpleRenderer,
 }
