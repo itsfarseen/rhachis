@@ -21,22 +21,28 @@ impl SimpleRenderer {
     pub fn new(data: &GameData, projection: Mat4) -> Self {
         let projection_bind_group_layout = Self::mat4_bind_group_layout(data);
 
-        let projection_buffer = data.graphics.lock().device.create_buffer_init(&BufferInitDescriptor {
-            label: None,
-            contents: bytemuck::cast_slice(&[projection.to_cols_array_2d()]),
-            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-        });
+        let projection_buffer =
+            data.graphics
+                .lock()
+                .device
+                .create_buffer_init(&BufferInitDescriptor {
+                    label: None,
+                    contents: bytemuck::cast_slice(&[projection.to_cols_array_2d()]),
+                    usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+                });
 
-        let projection_bind_group = data.graphics.lock().device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: None,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: projection_buffer.as_entire_binding(),
-                }
-            ],
-            layout: &projection_bind_group_layout,
-        });
+        let projection_bind_group =
+            data.graphics
+                .lock()
+                .device
+                .create_bind_group(&wgpu::BindGroupDescriptor {
+                    label: None,
+                    entries: &[wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: projection_buffer.as_entire_binding(),
+                    }],
+                    layout: &projection_bind_group_layout,
+                });
 
         Self {
             color_pipeline: Self::color_pipeline(data),
@@ -188,25 +194,24 @@ impl SimpleRenderer {
                 ..Default::default()
             })
     }
-    
+
     pub fn mat4_bind_group_layout(data: &GameData) -> wgpu::BindGroupLayout {
-        data.graphics.lock().device.create_bind_group_layout(
-            &wgpu::BindGroupLayoutDescriptor {
+        data.graphics
+            .lock()
+            .device
+            .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 label: None,
-                entries: &[
-                    wgpu::BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: wgpu::ShaderStages::VERTEX,
-                        ty: wgpu::BindingType::Buffer {
-                            ty: wgpu::BufferBindingType::Uniform,
-                            has_dynamic_offset: false,
-                            min_binding_size: None,
-                        },
-                        count: None,
-                    }
-                ]
-            }
-        )
+                entries: &[wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }],
+            })
     }
 }
 
@@ -312,13 +317,59 @@ impl Model {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct Transform {
     pub translation: Vec3,
     pub rotation: Quat,
     pub scale: Vec3,
 }
 
+macro_rules! transform_methods {
+    ($($i: ident: $t: ty),*) => {
+        $(
+            paste::paste! {
+                pub fn [<set_ $i>](&mut self, $i: $t) {
+                    self.$i = $i;
+                }
+
+                pub fn [<with_ $i>](mut self, $i: $t) -> Self {
+                    self.$i = $i;
+                    self
+                }
+
+                pub fn $i($i: $t) -> Self {
+                    Self {
+                        $i,
+                        ..Default::default()
+                    }
+                }
+            }
+        )*
+    };
+}
+
+macro_rules! with_set_translation {
+    ($($i: ident),*) => {
+        $(
+            paste::paste! {
+                pub fn [<set_ $i>](&mut self, $i: f32) {
+                    self.translation.$i = $i;
+                }
+
+                pub fn [<with_ $i>](mut self, $i: f32) -> Self {
+                    self.translation.$i = $i;
+                    self
+                }
+            }
+        )*
+    };
+}
+
 impl Transform {
+    transform_methods!(translation: Vec3, rotation: Quat, scale: Vec3);
+
+    with_set_translation!(x, y, z);
+
     pub fn matrix(&self) -> [[f32; 4]; 4] {
         Mat4::from_scale_rotation_translation(self.scale, self.rotation, self.translation)
             .to_cols_array_2d()
