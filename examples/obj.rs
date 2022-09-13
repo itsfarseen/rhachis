@@ -1,6 +1,6 @@
 use std::f32::consts::TAU;
 
-use glam::Mat4;
+use glam::{Mat4, Quat};
 use rhachis::{
     renderers::{Model, SimpleRenderer, Transform},
     Game, GameExt,
@@ -25,11 +25,11 @@ impl Game for Obj {
             ),
         );
         renderer.models.push(
-            Model::from_obj(data, "examples/test.obj", &renderer.nearest_sampler)
+            Model::from_obj(data, "examples/texture.obj", &renderer.nearest_sampler)
                 .unwrap()
                 .pop()
                 .unwrap()
-                .with_transforms(vec![Transform::translation((3.0, 0.0, 3.0).into())]),
+                .with_transforms(vec![Transform::rotation(Quat::from_rotation_y(TAU / 2.0))]),
         );
 
         Self { renderer }
