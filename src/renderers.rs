@@ -350,9 +350,13 @@ impl Model {
         }
     }
 
-    pub fn from_obj<P: AsRef<Path> + Debug>(data: &GameData, path: P) -> Result<Vec<Self>> {
+    pub fn from_obj<P: AsRef<Path> + Debug>(
+        data: &GameData,
+        path: P,
+        sampler: &Sampler,
+    ) -> Result<Vec<Self>> {
         let (models, materials) = tobj::load_obj(
-            path,
+            &path,
             &tobj::LoadOptions {
                 triangulate: true,
                 single_index: true,
@@ -382,9 +386,12 @@ impl Model {
                             })
                             .collect::<Vec<TextureVertex>>();
 
+                        let texture_path = &materials.as_ref().unwrap()[0].diffuse_texture;
+                        let texture = Texture::new(data, &image::open(&texture_path).unwrap(), sampler);
+
                         Self::new(
                             data,
-                            VertexSlice::TextureVertices(&vertices, todo!("Texture")),
+                            VertexSlice::TextureVertices(&vertices, texture),
                             &indices,
                             vec![Transform::default()],
                         )

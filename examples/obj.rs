@@ -25,7 +25,7 @@ impl Game for Obj {
             ),
         );
         renderer.models.push(
-            Model::from_obj(data, "examples/test.obj")
+            Model::from_obj(data, "examples/test.obj", &renderer.nearest_sampler)
                 .unwrap()
                 .pop()
                 .unwrap()
