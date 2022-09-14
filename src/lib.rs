@@ -21,6 +21,13 @@ pub struct GameData {
     pub graphics: Arc<Mutex<Graphics>>,
     pub input: Arc<Mutex<Input>>,
     pub window: Arc<Mutex<Window>>,
+    pub exit_code: Arc<Mutex<Option<i32>>>,
+}
+
+impl GameData {
+    pub fn exit(&self, code: Option<i32>) {
+        *self.exit_code.lock() = Some(code.unwrap_or_default());
+    }
 }
 
 pub trait Game {
@@ -47,6 +54,7 @@ where
             graphics: Arc::new(Mutex::new(pollster::block_on(Graphics::new(&window)))),
             input: Arc::new(Mutex::new(Input::new())),
             window: Arc::new(Mutex::new(window)),
+            exit_code: Arc::new(Mutex::new(None)),
         };
 
         let mut game = Self::init(&data);
@@ -55,10 +63,16 @@ where
         event_loop.run(move |event, _, control_flow| match event {
             Event::MainEventsCleared => {
                 data.delta_time = Instant::now() - last_update;
+
                 game.update(&data);
                 game.get_renderer().update(&data);
+                if let Some(code) = *data.exit_code.lock() {
+                    *control_flow = ControlFlow::ExitWithCode(code);
+                }
+
                 data.input.lock().update();
                 data.window.lock().request_redraw();
+
                 last_update = Instant::now();
             }
             Event::RedrawRequested(..) => data.graphics.lock().render(game.get_renderer()),

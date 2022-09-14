@@ -17,7 +17,7 @@ impl Game for Obj {
 
         let mut renderer = SimpleRenderer::new(
             data,
-            Mat4::perspective_lh(
+            Mat4::perspective_rh(
                 TAU / 4.0,
                 window_size.width as f32 / window_size.height as f32,
                 0.1,
@@ -29,7 +29,7 @@ impl Game for Obj {
                 .unwrap()
                 .pop()
                 .unwrap()
-                .with_transforms(vec![Transform::translation((0.0, 0.0, 4.0).into())]),
+                .with_transforms(vec![Transform::translation((0.0, 0.0, -4.0).into())]),
         );
 
         Self {
@@ -38,6 +38,9 @@ impl Game for Obj {
     }
 
     fn update(&mut self, data: &rhachis::GameData) {
+        if data.input.lock().is_key(rhachis::input::Key::Escape, rhachis::input::InputState::Pressed) {
+            data.exit(None);
+        }
         self.renderer.models[0].modify_transforms(|t| {
             t[0].set_y(f32::sin((Instant::now() - data.start_time).as_secs_f32() * 2.0) * 1.5)
         })
