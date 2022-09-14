@@ -1,4 +1,4 @@
-use std::f32::consts::TAU;
+use std::{f32::consts::TAU, time::Instant};
 
 use glam::{Mat4, Quat};
 use rhachis::{
@@ -9,7 +9,6 @@ use rhachis::{
 #[rhachis::run]
 struct Obj {
     renderer: SimpleRenderer,
-    angle: f32,
 }
 
 impl Game for Obj {
@@ -35,13 +34,13 @@ impl Game for Obj {
 
         Self {
             renderer,
-            angle: 0.0,
         }
     }
 
-    fn update(&mut self, _: &rhachis::GameData) {
-        self.angle += 0.1;
-        self.renderer.models[0].modify_transforms(|t| t[0].set_rotation(Quat::from_rotation_x(self.angle)))
+    fn update(&mut self, data: &rhachis::GameData) {
+        self.renderer.models[0].modify_transforms(|t| {
+            t[0].set_y(f32::sin((Instant::now() - data.start_time).as_secs_f32() * 2.0) * 1.5)
+        })
     }
 
     fn get_renderer(&mut self) -> &mut dyn rhachis::graphics::Renderer {

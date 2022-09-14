@@ -2,7 +2,7 @@ pub mod graphics;
 pub mod input;
 pub mod renderers;
 
-use std::sync::Arc;
+use std::{sync::Arc, time::{Duration, Instant}};
 
 use graphics::{Graphics, Renderer};
 use input::Input;
@@ -16,6 +16,8 @@ use winit::{
 pub use run_macro::run;
 
 pub struct GameData {
+    pub delta_time: Duration,
+    pub start_time: Instant,
     pub graphics: Arc<Mutex<Graphics>>,
     pub input: Arc<Mutex<Input>>,
     pub window: Arc<Mutex<Window>>,
@@ -39,7 +41,9 @@ where
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new().build(&event_loop).unwrap();
 
-        let data = GameData {
+        let mut data = GameData {
+            delta_time: Duration::ZERO,
+            start_time: Instant::now(),
             graphics: Arc::new(Mutex::new(pollster::block_on(Graphics::new(&window)))),
             input: Arc::new(Mutex::new(Input::new())),
             window: Arc::new(Mutex::new(window)),
@@ -47,12 +51,15 @@ where
 
         let mut game = Self::init(&data);
 
+        let mut last_update = Instant::now();
         event_loop.run(move |event, _, control_flow| match event {
             Event::MainEventsCleared => {
+                data.delta_time = Instant::now() - last_update;
                 game.update(&data);
                 game.get_renderer().update(&data);
                 data.input.lock().update();
                 data.window.lock().request_redraw();
+                last_update = Instant::now();
             }
             Event::RedrawRequested(..) => data.graphics.lock().render(game.get_renderer()),
             Event::WindowEvent { event, .. } => match event {
