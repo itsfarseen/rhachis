@@ -13,6 +13,7 @@ struct Obj {
 
 impl Game for Obj {
     fn init(data: &rhachis::GameData) -> Self {
+        data.window.lock().set_fullscreen(Some(winit::window::Fullscreen::Borderless(None)));
         let window_size = data.window.lock().inner_size();
 
         let mut renderer = SimpleRenderer::new(
