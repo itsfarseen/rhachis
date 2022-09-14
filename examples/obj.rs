@@ -1,6 +1,6 @@
 use std::{f32::consts::TAU, time::Instant};
 
-use glam::{Mat4, Quat};
+use glam::Mat4;
 use rhachis::{
     renderers::{Model, SimpleRenderer, Transform},
     Game, GameExt,
