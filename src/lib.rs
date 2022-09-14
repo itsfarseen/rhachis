@@ -64,7 +64,10 @@ where
                 WindowEvent::CursorMoved { position, .. } => {
                     data.input.lock().handle_cursor(position)
                 }
-                WindowEvent::Resized(size) => data.graphics.lock().resize(size),
+                WindowEvent::Resized(size) => {
+                    data.graphics.lock().resize(size);
+                    game.get_renderer().resize(&data);
+                }
                 WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                     data.graphics.lock().resize(*new_inner_size)
                 }

@@ -102,6 +102,7 @@ pub trait Renderer {
 
     fn render(&self, _: RenderPass) {}
     fn update(&mut self, _: &GameData) {}
+    fn resize(&mut self, _: &GameData) {}
 }
 
 pub struct EmptyRenderer;

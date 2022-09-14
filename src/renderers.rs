@@ -5,7 +5,7 @@ use glam::{Mat4, Quat, Vec3};
 use image::{DynamicImage, GenericImageView};
 use wgpu::{
     util::{BufferInitDescriptor, DeviceExt},
-    BindGroup, Buffer, RenderPipeline, Sampler,
+    BindGroup, Buffer, RenderPipeline, Sampler, TextureView,
 };
 
 use crate::{graphics::Renderer, GameData};
@@ -14,6 +14,7 @@ pub struct SimpleRenderer {
     color_pipeline: RenderPipeline,
     texture_pipeline: RenderPipeline,
     projection_bind_group: BindGroup,
+    pub depth_texture_view: TextureView,
     pub nearest_sampler: Sampler,
     pub linear_sampler: Sampler,
     pub models: Vec<Model>,
@@ -50,6 +51,7 @@ impl SimpleRenderer {
             color_pipeline: Self::color_pipeline(data),
             texture_pipeline: Self::texture_pipeline(data),
             projection_bind_group,
+            depth_texture_view: Self::depth_texture(data),
             nearest_sampler: Self::nearest_sampler(data),
             linear_sampler: Self::linear_sampler(data),
             models: Vec::new(),
@@ -109,7 +111,13 @@ impl SimpleRenderer {
                     polygon_mode: wgpu::PolygonMode::Fill,
                     conservative: false,
                 },
-                depth_stencil: None,
+                depth_stencil: Some(wgpu::DepthStencilState {
+                    format: wgpu::TextureFormat::Depth32Float,
+                    depth_write_enabled: true,
+                    depth_compare: wgpu::CompareFunction::Less,
+                    stencil: wgpu::StencilState::default(),
+                    bias: wgpu::DepthBiasState::default(),
+                }),
                 multisample: wgpu::MultisampleState {
                     count: 1,
                     mask: !0,
@@ -174,7 +182,13 @@ impl SimpleRenderer {
                     polygon_mode: wgpu::PolygonMode::Fill,
                     conservative: false,
                 },
-                depth_stencil: None,
+                depth_stencil: Some(wgpu::DepthStencilState {
+                    format: wgpu::TextureFormat::Depth32Float,
+                    depth_write_enabled: true,
+                    depth_compare: wgpu::CompareFunction::Less,
+                    stencil: wgpu::StencilState::default(),
+                    bias: wgpu::DepthBiasState::default(),
+                }),
                 multisample: wgpu::MultisampleState {
                     count: 1,
                     mask: !0,
@@ -230,6 +244,33 @@ impl SimpleRenderer {
                 }],
             })
     }
+
+    pub fn depth_texture(data: &GameData) -> TextureView {
+        let width = data.graphics.lock().config.width;
+        let height = data.graphics.lock().config.height;
+
+        let size = wgpu::Extent3d {
+            width,
+            height,
+            depth_or_array_layers: 1,
+        };
+
+        let texture = data
+            .graphics
+            .lock()
+            .device
+            .create_texture(&wgpu::TextureDescriptor {
+                label: None,
+                size,
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format: wgpu::TextureFormat::Depth32Float,
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT
+                    | wgpu::TextureUsages::TEXTURE_BINDING,
+            });
+        texture.create_view(&wgpu::TextureViewDescriptor::default())
+    }
 }
 
 impl Renderer for SimpleRenderer {
@@ -256,6 +297,36 @@ impl Renderer for SimpleRenderer {
                 model.update_transforms(data);
             }
         }
+    }
+
+    fn make_render_pass<'a>(
+        &'a self,
+        view: &'a TextureView,
+        encoder: &'a mut wgpu::CommandEncoder,
+    ) -> wgpu::RenderPass {
+        encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("render_pass"),
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                    store: true,
+                },
+            })],
+            depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                view: &self.depth_texture_view,
+                depth_ops: Some(wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(1.0),
+                    store: true,
+                }),
+                stencil_ops: None,
+            }),
+        })
+    }
+
+    fn resize(&mut self, data: &GameData) {
+        self.depth_texture_view = Self::depth_texture(data);
     }
 }
 
@@ -387,7 +458,8 @@ impl Model {
                             .collect::<Vec<TextureVertex>>();
 
                         let texture_path = &materials.as_ref().unwrap()[0].diffuse_texture;
-                        let texture = Texture::new(data, &image::open(&texture_path).unwrap(), sampler);
+                        let texture =
+                            Texture::new(data, &image::open(&texture_path).unwrap(), sampler);
 
                         Self::new(
                             data,
