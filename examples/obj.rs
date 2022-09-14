@@ -9,6 +9,7 @@ use rhachis::{
 #[rhachis::run]
 struct Obj {
     renderer: SimpleRenderer,
+    angle: f32,
 }
 
 impl Game for Obj {
@@ -29,10 +30,18 @@ impl Game for Obj {
                 .unwrap()
                 .pop()
                 .unwrap()
-                .with_transforms(vec![Transform::rotation(Quat::from_rotation_y(TAU / 2.0))]),
+                .with_transforms(vec![Transform::translation((0.0, 0.0, 4.0).into())]),
         );
 
-        Self { renderer }
+        Self {
+            renderer,
+            angle: 0.0,
+        }
+    }
+
+    fn update(&mut self, _: &rhachis::GameData) {
+        self.angle += 0.1;
+        self.renderer.models[0].modify_transforms(|t| t[0].set_rotation(Quat::from_rotation_x(self.angle)))
     }
 
     fn get_renderer(&mut self) -> &mut dyn rhachis::graphics::Renderer {
