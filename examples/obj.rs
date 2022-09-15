@@ -43,7 +43,8 @@ impl Game for Obj {
             data.exit(None);
         }
         self.renderer.models[0].modify_transforms(|t| {
-            t[0].set_y(f32::sin((Instant::now() - data.start_time).as_secs_f32() * 2.0) * 1.5)
+            t[0].set_x(f32::sin((Instant::now() - data.start_time).as_secs_f32() * 2.0) * 2.5);
+            t[0].set_y(f32::sin((Instant::now() - data.start_time).as_secs_f32() * 2.0) * 2.5);
         })
     }
 

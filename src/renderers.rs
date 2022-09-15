@@ -453,7 +453,7 @@ impl Model {
                         let vertices = iter_tools::zip(positions, tex_coords)
                             .map(|(pos, tex_coords)| TextureVertex {
                                 pos: [pos[0], pos[1], pos[2]],
-                                tex_coords: [tex_coords[0], tex_coords[1]],
+                                tex_coords: [tex_coords[0], -tex_coords[1]],
                             })
                             .collect::<Vec<TextureVertex>>();
 
