@@ -2,7 +2,10 @@ pub mod graphics;
 pub mod input;
 pub mod renderers;
 
-use std::{sync::Arc, time::{Duration, Instant}};
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use graphics::{Graphics, Renderer};
 use input::Input;

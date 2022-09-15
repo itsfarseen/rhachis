@@ -13,7 +13,9 @@ struct Obj {
 
 impl Game for Obj {
     fn init(data: &rhachis::GameData) -> Self {
-        data.window.lock().set_fullscreen(Some(winit::window::Fullscreen::Borderless(None)));
+        data.window
+            .lock()
+            .set_fullscreen(Some(winit::window::Fullscreen::Borderless(None)));
         let window_size = data.window.lock().inner_size();
 
         let mut renderer = SimpleRenderer::new(
@@ -33,13 +35,14 @@ impl Game for Obj {
                 .with_transforms(vec![Transform::translation((0.0, 0.0, -4.0).into())]),
         );
 
-        Self {
-            renderer,
-        }
+        Self { renderer }
     }
 
     fn update(&mut self, data: &rhachis::GameData) {
-        if data.input.lock().is_key(rhachis::input::Key::Escape, rhachis::input::InputState::Pressed) {
+        if data.input.lock().is_key(
+            rhachis::input::Key::Escape,
+            rhachis::input::InputState::Pressed,
+        ) {
             data.exit(None);
         }
         self.renderer.models[0].modify_transforms(|t| {
