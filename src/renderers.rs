@@ -364,7 +364,7 @@ pub struct Model {
     pub index_buffer: Buffer,
     pub index_count: u32,
     pub transforms: Vec<Transform>,
-    transforms_outdated: bool,
+    pub transforms_outdated: bool,
     pub transform_buffer: Buffer,
     pub transform_count: u32,
 }
@@ -494,17 +494,33 @@ impl Model {
     }
 
     pub fn update_transforms(&mut self, data: &GameData) {
-        data.graphics.lock().queue.write_buffer(
-            &self.transform_buffer,
-            0,
-            bytemuck::cast_slice(
-                &self
-                    .transforms
-                    .iter()
-                    .map(Transform::matrix)
-                    .collect::<Vec<[[f32; 4]; 4]>>(),
-            ),
-        );
+        if self.transforms.len() as u32 != self.transform_count {
+            self.transform_buffer = data.graphics.lock().device.create_buffer_init(&BufferInitDescriptor {
+                label: None,
+                contents: bytemuck::cast_slice(
+                    &self
+                        .transforms
+                        .iter()
+                        .map(Transform::matrix)
+                        .collect::<Vec<[[f32; 4]; 4]>>(),
+                ),
+                usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+            });
+            self.transform_count = self.transforms.len() as u32;
+        } else {
+            data.graphics.lock().queue.write_buffer(
+                &self.transform_buffer,
+                0,
+                bytemuck::cast_slice(
+                    &self
+                        .transforms
+                        .iter()
+                        .map(Transform::matrix)
+                        .collect::<Vec<[[f32; 4]; 4]>>(),
+                ),
+            );
+        }
+
         self.transforms_outdated = false;
     }
 
