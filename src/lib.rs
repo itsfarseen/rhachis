@@ -1,5 +1,6 @@
 pub mod graphics;
 pub mod input;
+pub mod rand;
 pub mod renderers;
 
 use std::{
