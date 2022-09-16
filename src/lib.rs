@@ -44,6 +44,7 @@ impl GameData {
 pub trait Game {
     fn init(data: &GameData) -> Self;
     fn update(&mut self, _: &GameData) {}
+    fn handle_event(&mut self, _: &GameData, event: Event<()>) {}
     fn get_renderer(&mut self) -> &mut dyn Renderer;
 }
 
@@ -71,41 +72,45 @@ where
         let mut game = Self::init(&data);
 
         let mut last_update = Instant::now();
-        event_loop.run(move |event, _, control_flow| match event {
-            Event::MainEventsCleared => {
-                data.delta_time = Instant::now() - last_update;
+        event_loop.run(move |event, _, control_flow| {
+            match &event {
+                Event::MainEventsCleared => {
+                    data.delta_time = Instant::now() - last_update;
 
-                game.update(&data);
-                game.get_renderer().update(&data);
-                if let Some(code) = *data.exit_code.lock() {
-                    *control_flow = ControlFlow::ExitWithCode(code);
-                }
+                    game.update(&data);
+                    game.get_renderer().update(&data);
+                    if let Some(code) = *data.exit_code.lock() {
+                        *control_flow = ControlFlow::ExitWithCode(code);
+                    }
 
-                data.input.lock().update();
-                data.window.lock().request_redraw();
+                    data.input.lock().update();
+                    data.window.lock().request_redraw();
 
-                last_update = Instant::now();
-            }
-            Event::RedrawRequested(..) => data.graphics.lock().render(game.get_renderer()),
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-                WindowEvent::KeyboardInput { input, .. } => data.input.lock().handle_key(input),
-                WindowEvent::MouseInput { state, button, .. } => {
-                    data.input.lock().handle_button(button, state)
+                    last_update = Instant::now();
                 }
-                WindowEvent::CursorMoved { position, .. } => {
-                    data.input.lock().handle_cursor(position)
-                }
-                WindowEvent::Resized(size) => {
-                    data.graphics.lock().resize(size);
-                    game.get_renderer().resize(&data);
-                }
-                WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                    data.graphics.lock().resize(*new_inner_size)
-                }
+                Event::RedrawRequested(..) => data.graphics.lock().render(game.get_renderer()),
+                Event::WindowEvent { event, .. } => match event {
+                    WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                    WindowEvent::KeyboardInput { input, .. } => data.input.lock().handle_key(*input),
+                    WindowEvent::MouseInput { state, button, .. } => {
+                        data.input.lock().handle_button(*button, *state)
+                    }
+                    WindowEvent::CursorMoved { position, .. } => {
+                        data.input.lock().handle_cursor(*position)
+                    }
+                    WindowEvent::Resized(size) => {
+                        data.graphics.lock().resize(*size);
+                        game.get_renderer().resize(&data);
+                    }
+                    WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
+                        data.graphics.lock().resize(**new_inner_size)
+                    }
+                    _ => {}
+                },
                 _ => {}
-            },
-            _ => {}
+            }
+
+            game.handle_event(&data, event)
         });
     }
 }
