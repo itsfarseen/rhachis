@@ -13,6 +13,7 @@ use crate::{graphics::Renderer, GameData};
 pub struct SimpleRenderer {
     color_pipeline: RenderPipeline,
     texture_pipeline: RenderPipeline,
+    projection_buffer: Buffer,
     projection_bind_group: BindGroup,
     pub depth_texture_view: TextureView,
     pub nearest_sampler: Sampler,
@@ -50,12 +51,21 @@ impl SimpleRenderer {
         Self {
             color_pipeline: Self::color_pipeline(data),
             texture_pipeline: Self::texture_pipeline(data),
+            projection_buffer,
             projection_bind_group,
             depth_texture_view: Self::depth_texture(data),
             nearest_sampler: Self::nearest_sampler(data),
             linear_sampler: Self::linear_sampler(data),
             models: Vec::new(),
         }
+    }
+
+    pub fn set_projection(&mut self, data: &GameData, projection: Mat4) {
+        data.graphics.lock().queue.write_buffer(
+            &self.projection_buffer,
+            0,
+            bytemuck::cast_slice(&[projection.to_cols_array_2d()]),
+        )
     }
 
     pub fn color_pipeline(data: &GameData) -> RenderPipeline {
