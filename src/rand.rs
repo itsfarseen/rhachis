@@ -1,16 +1,18 @@
 use std::time::SystemTime;
 
 pub struct Noise {
-    seed: u32,
-    index: u32,
+    pub seed: u32,
+    pub index: u32,
 }
 
 impl Noise {
     pub fn new() -> Noise {
-        let seed = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .unwrap()
-            .as_secs() as u32;
+        let seed = (
+            SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_secs() % u32::MAX as u64
+            ) as u32;
 
         Self {
             seed,

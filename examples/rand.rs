@@ -11,7 +11,7 @@ fn main() {
     }
 
     let noise = Noise::new();
-    println!("New");
+    println!("New: {}", noise.seed);
     for j in 0..7 {
         println!("{:032b} {:08x}", noise.get(j), noise.get(j));
     }
