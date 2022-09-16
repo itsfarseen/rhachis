@@ -1,5 +1,5 @@
 [default]
-cargo run --example rand
+cargo run --example perlin
 
 [check]
 cargo clippy --examples && cargo fmt

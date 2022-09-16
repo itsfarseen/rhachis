@@ -90,8 +90,10 @@ pub fn perlin_2d(noise: &Noise, pos: Vec2) -> f32 {
     let lerp_weights = pos - grid_cell_start;
 
     let top_left_gradient = dot_gradient(noise, grid_cell_start, pos);
-    let top_right_gradient = dot_gradient(noise, Vec2::new(grid_cell_start.x, grid_cell_end.y), pos);
-    let bottom_left_gradient = dot_gradient(noise, Vec2::new(grid_cell_end.x, grid_cell_start.y), pos);
+    let top_right_gradient =
+        dot_gradient(noise, Vec2::new(grid_cell_start.x, grid_cell_end.y), pos);
+    let bottom_left_gradient =
+        dot_gradient(noise, Vec2::new(grid_cell_end.x, grid_cell_start.y), pos);
     let bottom_right_gradient = dot_gradient(noise, grid_cell_end, pos);
 
     let top_lerp = lerp(top_left_gradient, top_right_gradient, lerp_weights.x);
