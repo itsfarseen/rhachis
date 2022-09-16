@@ -1,4 +1,7 @@
-use std::time::SystemTime;
+use std::{
+    ops::{Bound, RangeBounds},
+    time::SystemTime,
+};
 
 pub struct Noise {
     pub seed: u32,
@@ -36,6 +39,25 @@ impl Noise {
     pub fn next(&mut self) -> u32 {
         self.index += 1;
         self.get(self.index)
+    }
+
+    pub fn get_range<T: RangeBounds<u32>>(&self, index: u32, range: T) -> u32 {
+        let start = match range.start_bound() {
+            Bound::Included(x) => *x,
+            Bound::Excluded(x) => *x + 1,
+            Bound::Unbounded => u32::MIN,
+        };
+        let end = match range.end_bound() {
+            Bound::Included(x) => *x + 1,
+            Bound::Excluded(x) => *x,
+            Bound::Unbounded => u32::MAX,
+        };
+        self.get(index) % (end - start) + start
+    }
+
+    pub fn next_range<T: RangeBounds<u32>>(&mut self, range: T) -> u32 {
+        self.index += 1;
+        self.get_range(self.index, range)
     }
 }
 

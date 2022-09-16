@@ -6,13 +6,14 @@ fn main() {
         println!("Seed: {i}");
         let noise = Noise::from_seed(i);
         for j in 0..7 {
-            println!("{:032b} {:08x}", noise.get(j), noise.get(j));
+            let val = noise.get(j);
+            println!("{val:032b} {val:08x}");
         }
     }
 
-    let noise = Noise::new();
+    let mut noise = Noise::new();
     println!("New: {}", noise.seed);
-    for j in 0..7 {
-        println!("{:032b} {:08x}", noise.get(j), noise.get(j));
+    for _ in 0..7 {
+        println!("{:032b}", noise.next_range(4..8));
     }
 }
