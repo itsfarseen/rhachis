@@ -9,4 +9,10 @@ fn main() {
             println!("{:032b} {:08x}", noise.get(j), noise.get(j));
         }
     }
+
+    let noise = Noise::new();
+    println!("New");
+    for j in 0..7 {
+        println!("{:032b} {:08x}", noise.get(j), noise.get(j));
+    }
 }
