@@ -1,6 +1,6 @@
 use glam::Mat4;
 use rhachis::{
-    renderers::{Model, SimpleRenderer, Texture, TextureVertex, Transform, VertexSlice},
+    renderers::{Model, SimpleRenderer, Texture, Transform},
     Game, GameExt,
 };
 
@@ -15,34 +15,13 @@ impl Game for Image {
             data,
             Mat4::orthographic_lh(-2.0, 2.0, -1.0, 1.0, -0.1, 100.0),
         );
-        renderer.models.push(Model::new(
+        renderer.models.push(Model::quad_texture(
             data,
-            VertexSlice::TextureVertices(
-                &[
-                    TextureVertex {
-                        pos: [0.0, 0.0, 0.0],
-                        tex_coords: [0.0, 1.0],
-                    },
-                    TextureVertex {
-                        pos: [1.0, 0.0, 0.0],
-                        tex_coords: [1.0, 1.0],
-                    },
-                    TextureVertex {
-                        pos: [0.0, 1.0, 0.0],
-                        tex_coords: [0.0, 0.0],
-                    },
-                    TextureVertex {
-                        pos: [1.0, 1.0, 0.0],
-                        tex_coords: [1.0, 0.0],
-                    },
-                ],
-                Texture::new(
-                    data,
-                    &image::open("examples/test.png").unwrap(),
-                    &renderer.linear_sampler,
-                ),
+            Texture::new(
+                data,
+                &image::open("examples/test.png").unwrap(),
+                &renderer.linear_sampler,
             ),
-            &[0, 1, 2, 1, 3, 2],
             vec![Transform::scale((0.5, 0.5, 1.0).into())],
         ));
 

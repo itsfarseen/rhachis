@@ -494,6 +494,61 @@ impl Model {
         Ok(to_ret)
     }
 
+    pub fn quad(data: &GameData, transforms: Vec<Transform>) -> Self {
+        Self::new(
+            data,
+            VertexSlice::ColorVertices(&[
+                ColorVertex {
+                    pos: [0.0, 0.0, 0.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+                ColorVertex {
+                    pos: [1.0, 0.0, 0.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+                ColorVertex {
+                    pos: [0.0, 1.0, 0.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+                ColorVertex {
+                    pos: [1.0, 1.0, 0.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+            ]),
+            &[0, 1, 2, 1, 3, 2],
+            transforms,
+        )
+    }
+
+    pub fn quad_texture(data: &GameData, texture: Texture, transforms: Vec<Transform>) -> Self {
+        Self::new(
+            data,
+            VertexSlice::TextureVertices(
+                &[
+                    TextureVertex {
+                        pos: [0.0, 0.0, 0.0],
+                        tex_coords: [0.0, 1.0],
+                    },
+                    TextureVertex {
+                        pos: [1.0, 0.0, 0.0],
+                        tex_coords: [1.0, 1.0],
+                    },
+                    TextureVertex {
+                        pos: [0.0, 1.0, 0.0],
+                        tex_coords: [0.0, 0.0],
+                    },
+                    TextureVertex {
+                        pos: [1.0, 1.0, 0.0],
+                        tex_coords: [1.0, 0.0],
+                    },
+                ],
+                texture,
+            ),
+            &[0, 1, 2, 1, 3, 2],
+            transforms,
+        )
+    }
+
     pub fn update_transforms(&mut self, data: &GameData) {
         if self.transforms.len() as u32 != self.transform_count {
             self.transform_buffer =
