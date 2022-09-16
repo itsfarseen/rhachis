@@ -7,9 +7,6 @@ use rhachis::{
     Game, GameExt, input::{Key, InputState}, GameData,
 };
 
-const TERRAIN_HEIGHT: u32 = 5;
-const TERRAIN_WIDTH: u32 = 5;
-
 fn make_projection(data: &GameData, distance: f32, angle: f32) -> Mat4 {
     let proj = Mat4::perspective_rh(
         TAU / 4.0,
@@ -19,7 +16,7 @@ fn make_projection(data: &GameData, distance: f32, angle: f32) -> Mat4 {
     );
 
     let view = Mat4::look_at_rh(
-        Vec3::new(f32::sin(angle), f32::cos(angle), 1.0 / (distance / 5.0)) * distance,
+        Vec3::new(f32::sin(angle), 1.0 / (distance / 5.0), f32::cos(angle)) * distance,
         Vec3::ZERO,
         Vec3::Y
     );
@@ -75,6 +72,14 @@ impl Game for PerlinExample {
             self.cam_distance += 0.1;
             cam_move = true;
         }
+        if input.is_key(Key::Char('a'), InputState::Down) && self.cam_distance > 1.0 {
+            self.cam_angle -= 0.1;
+            cam_move = true;
+        }
+        if input.is_key(Key::Char('d'), InputState::Down) {
+            self.cam_angle += 0.1;
+            cam_move = true;
+        }
 
         if cam_move {
             let projection = make_projection(data, self.cam_distance, self.cam_angle);
@@ -90,8 +95,8 @@ impl Game for PerlinExample {
 fn terrain_transforms(noise: &Noise) -> Vec<Transform> {
     let mut to_ret = Vec::new();
 
-    for x in 0..TERRAIN_WIDTH {
-        for y in 0..TERRAIN_HEIGHT {
+    for x in -5..6 {
+        for y in -5..6 {
             let height = (x + y) as f32 / 3.0;
 
             to_ret.push(
