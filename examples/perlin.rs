@@ -2,9 +2,10 @@ use std::f32::consts::TAU;
 
 use glam::{Mat4, Quat, Vec3};
 use rhachis::{
+    input::{InputState, Key},
     rand::Noise,
     renderers::{Model, SimpleRenderer, Transform},
-    Game, GameExt, input::{Key, InputState}, GameData,
+    Game, GameData, GameExt,
 };
 
 fn make_projection(data: &GameData, distance: f32, angle: f32) -> Mat4 {
@@ -18,7 +19,7 @@ fn make_projection(data: &GameData, distance: f32, angle: f32) -> Mat4 {
     let view = Mat4::look_at_rh(
         Vec3::new(f32::sin(angle), 1.0 / (distance / 5.0), f32::cos(angle)) * distance,
         Vec3::ZERO,
-        Vec3::Y
+        Vec3::Y,
     );
 
     proj * view
@@ -36,10 +37,8 @@ impl Game for PerlinExample {
         let cam_distance = 2.0;
         let cam_angle = 0.0;
 
-        let mut renderer = SimpleRenderer::new(
-            data,
-            make_projection(data, cam_distance, cam_angle),
-        );
+        let mut renderer =
+            SimpleRenderer::new(data, make_projection(data, cam_distance, cam_angle));
 
         renderer.models.push(
             Model::from_obj(
@@ -101,11 +100,9 @@ fn terrain_transforms(noise: &Noise) -> Vec<Transform> {
             let height = (x + y) as f32 / 3.0;
 
             to_ret.push(
-                Transform::translation((
-                    x as f32,
-                    height - 2.0,
-                    -(y as f32 + 3.0),
-                ).into()).with_rotation(Quat::from_rotation_y(TAU / 4.0)).with_scale((0.5, 0.5, 0.5).into())
+                Transform::translation((x as f32, height - 2.0, -(y as f32 + 3.0)).into())
+                    .with_rotation(Quat::from_rotation_y(TAU / 4.0))
+                    .with_scale((0.5, 0.5, 0.5).into()),
             );
         }
     }

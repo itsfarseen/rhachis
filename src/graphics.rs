@@ -80,6 +80,7 @@ impl Graphics {
     }
 }
 
+#[allow(unused)]
 pub trait Renderer {
     fn make_render_pass<'a>(
         &'a self,
@@ -100,9 +101,9 @@ pub trait Renderer {
         })
     }
 
-    fn render(&self, _: RenderPass) {}
-    fn update(&mut self, _: &GameData) {}
-    fn resize(&mut self, _: &GameData) {}
+    fn render(&self, render_pass: RenderPass) {}
+    fn update(&mut self, data: &GameData) {}
+    fn resize(&mut self, data: &GameData) {}
 }
 
 pub struct EmptyRenderer;

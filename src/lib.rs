@@ -41,10 +41,11 @@ impl GameData {
     }
 }
 
+#[allow(unused)]
 pub trait Game {
     fn init(data: &GameData) -> Self;
-    fn update(&mut self, _: &GameData) {}
-    fn handle_event(&mut self, _: &GameData, event: Event<()>) {}
+    fn update(&mut self, data: &GameData) {}
+    fn handle_event(&mut self, data: &GameData, event: Event<()>) {}
     fn get_renderer(&mut self) -> &mut dyn Renderer;
 }
 
@@ -91,7 +92,9 @@ where
                 Event::RedrawRequested(..) => data.graphics.lock().render(game.get_renderer()),
                 Event::WindowEvent { event, .. } => match event {
                     WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-                    WindowEvent::KeyboardInput { input, .. } => data.input.lock().handle_key(*input),
+                    WindowEvent::KeyboardInput { input, .. } => {
+                        data.input.lock().handle_key(*input)
+                    }
                     WindowEvent::MouseInput { state, button, .. } => {
                         data.input.lock().handle_button(*button, *state)
                     }
