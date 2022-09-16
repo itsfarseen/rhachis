@@ -61,23 +61,24 @@ impl Game for PerlinExample {
     }
 
     fn update(&mut self, data: &rhachis::GameData) {
+        let delta_time = data.delta_time.as_secs_f32();
         let input = data.input.lock();
 
         let mut cam_move = false;
         if input.is_key(Key::Char('w'), InputState::Down) && self.cam_distance > 1.0 {
-            self.cam_distance -= 0.1;
+            self.cam_distance -= 4.0 * delta_time;
             cam_move = true;
         }
         if input.is_key(Key::Char('s'), InputState::Down) {
-            self.cam_distance += 0.1;
+            self.cam_distance += 4.0 * delta_time;
             cam_move = true;
         }
         if input.is_key(Key::Char('a'), InputState::Down) && self.cam_distance > 1.0 {
-            self.cam_angle -= 0.1;
+            self.cam_angle -= TAU / 2.0 * delta_time;
             cam_move = true;
         }
         if input.is_key(Key::Char('d'), InputState::Down) {
-            self.cam_angle += 0.1;
+            self.cam_angle += TAU / 2.0 * delta_time;
             cam_move = true;
         }
 
