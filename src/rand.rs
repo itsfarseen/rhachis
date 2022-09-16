@@ -7,24 +7,17 @@ pub struct Noise {
 
 impl Noise {
     pub fn new() -> Noise {
-        let seed = (
-            SystemTime::now()
-                .duration_since(SystemTime::UNIX_EPOCH)
-                .unwrap()
-                .as_secs() % u32::MAX as u64
-            ) as u32;
+        let seed = (SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_secs()
+            % u32::MAX as u64) as u32;
 
-        Self {
-            seed,
-            index: 0,
-        }
+        Self { seed, index: 0 }
     }
 
     pub fn from_seed(seed: u32) -> Noise {
-        Self {
-            seed,
-            index: 0,
-        }
+        Self { seed, index: 0 }
     }
 
     pub fn get(&self, x: u32) -> u32 {
@@ -34,7 +27,9 @@ impl Noise {
             ^ !x.rotate_left(20)
             ^ self.seed.rotate_right(15)
             ^ x.rotate_right((self.seed % 3).wrapping_add(1))
-            ^ self.seed.rotate_right(x.checked_rem(self.seed).unwrap_or(1))
+            ^ self
+                .seed
+                .rotate_right(x.checked_rem(self.seed).unwrap_or(1))
     }
 
     #[allow(clippy::should_implement_trait)]

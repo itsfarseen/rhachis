@@ -28,16 +28,18 @@ impl Game for Obj {
             ),
         );
         renderer.models.push(
-            Model::from_obj(data, "examples/texture.obj", &renderer.nearest_sampler)
-                .unwrap()
-                .pop()
-                .unwrap()
-                .with_transforms(
-                    vec![
-                        Transform::translation((0.0, 0.0, -4.0).into()),
-                        Transform::translation((0.0, 0.0, -4.0).into()),
-                    ]
-                ),
+            Model::from_obj(
+                data,
+                "examples/texture.obj",
+                &renderer.nearest_sampler,
+                vec![
+                    Transform::translation((0.0, 0.0, -4.0).into()),
+                    Transform::translation((0.0, 0.0, -4.0).into()),
+                ],
+            )
+            .unwrap()
+            .pop()
+            .unwrap(),
         );
 
         Self { renderer }
@@ -53,8 +55,12 @@ impl Game for Obj {
         self.renderer.models[0].modify_transforms(|t| {
             t[0].set_x(f32::sin((Instant::now() - data.start_time).as_secs_f32() * 2.0) * 2.5);
             t[0].set_y(f32::sin((Instant::now() - data.start_time).as_secs_f32() * 2.0) * 2.5);
-            t[1].set_x(-f32::sin(TAU / 3.0 + (Instant::now() - data.start_time).as_secs_f32() * 2.0) * 2.5);
-            t[1].set_y(f32::sin(TAU / 3.0 + (Instant::now() - data.start_time).as_secs_f32() * 2.0) * 2.5);
+            t[1].set_x(
+                -f32::sin(TAU / 3.0 + (Instant::now() - data.start_time).as_secs_f32() * 2.0) * 2.5,
+            );
+            t[1].set_y(
+                f32::sin(TAU / 3.0 + (Instant::now() - data.start_time).as_secs_f32() * 2.0) * 2.5,
+            );
         })
     }
 

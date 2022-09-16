@@ -425,6 +425,7 @@ impl Model {
         data: &GameData,
         path: P,
         sampler: &Sampler,
+        transforms: Vec<Transform>,
     ) -> Result<Vec<Self>> {
         let (models, materials) = tobj::load_obj(
             &path,
@@ -465,7 +466,7 @@ impl Model {
                             data,
                             VertexSlice::TextureVertices(&vertices, texture),
                             &indices,
-                            vec![Transform::default()],
+                            transforms.clone(),
                         )
                     }
                     None => {
@@ -483,7 +484,7 @@ impl Model {
                             data,
                             VertexSlice::ColorVertices(&vertices),
                             &indices,
-                            vec![Transform::default()],
+                            transforms.clone(),
                         )
                     }
                 }
@@ -495,17 +496,21 @@ impl Model {
 
     pub fn update_transforms(&mut self, data: &GameData) {
         if self.transforms.len() as u32 != self.transform_count {
-            self.transform_buffer = data.graphics.lock().device.create_buffer_init(&BufferInitDescriptor {
-                label: None,
-                contents: bytemuck::cast_slice(
-                    &self
-                        .transforms
-                        .iter()
-                        .map(Transform::matrix)
-                        .collect::<Vec<[[f32; 4]; 4]>>(),
-                ),
-                usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-            });
+            self.transform_buffer =
+                data.graphics
+                    .lock()
+                    .device
+                    .create_buffer_init(&BufferInitDescriptor {
+                        label: None,
+                        contents: bytemuck::cast_slice(
+                            &self
+                                .transforms
+                                .iter()
+                                .map(Transform::matrix)
+                                .collect::<Vec<[[f32; 4]; 4]>>(),
+                        ),
+                        usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                    });
             self.transform_count = self.transforms.len() as u32;
         } else {
             data.graphics.lock().queue.write_buffer(
