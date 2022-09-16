@@ -9,6 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use glam::UVec2;
 use graphics::{Graphics, Renderer};
 use input::Input;
 use parking_lot::Mutex;
@@ -30,6 +31,11 @@ pub struct GameData {
 }
 
 impl GameData {
+    pub fn get_window_size(&self) -> UVec2 {
+        let size = self.window.lock().inner_size();
+        UVec2::new(size.width, size.height)
+    }
+
     pub fn exit(&self, code: Option<i32>) {
         *self.exit_code.lock() = Some(code.unwrap_or_default());
     }
