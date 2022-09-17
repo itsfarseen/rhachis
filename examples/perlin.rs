@@ -34,6 +34,7 @@ struct PerlinExample {
 
 impl Game for PerlinExample {
     fn init(data: &GameData) -> Self {
+        data.window.lock().set_fullscreen(Some(winit::window::Fullscreen::Borderless(None)));
         let cam_distance = 2.0;
         let cam_angle = 0.0;
 
@@ -79,6 +80,9 @@ impl Game for PerlinExample {
         if input.is_key(Key::Char('d'), InputState::Down) {
             self.cam_angle += TAU / 2.0 * delta_time;
             cam_move = true;
+        }
+        if input.is_key(Key::Escape, InputState::Pressed) {
+            data.exit(None);
         }
 
         if cam_move {
