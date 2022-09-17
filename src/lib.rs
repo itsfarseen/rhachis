@@ -44,9 +44,9 @@ impl GameData {
 #[allow(unused)]
 pub trait Game {
     fn init(data: &GameData) -> Self;
+    fn get_renderer(&mut self) -> &mut dyn Renderer;
     fn update(&mut self, data: &GameData) {}
     fn handle_event(&mut self, data: &GameData, event: Event<()>) {}
-    fn get_renderer(&mut self) -> &mut dyn Renderer;
 }
 
 pub trait GameExt {
@@ -106,7 +106,8 @@ where
                         game.get_renderer().resize(&data);
                     }
                     WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                        data.graphics.lock().resize(**new_inner_size)
+                        data.graphics.lock().resize(**new_inner_size);
+                        game.get_renderer().resize(&data);
                     }
                     _ => {}
                 },
