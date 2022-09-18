@@ -28,15 +28,12 @@ impl Noise {
     }
 
     pub fn get(&self, x: u32) -> u32 {
-        x.wrapping_add(479001599)
-            ^ x.wrapping_pow(5)
-            ^ self.seed.rotate_left(7)
-            ^ !x.rotate_left(20)
-            ^ self.seed.rotate_right(15)
-            ^ x.rotate_right((self.seed % 3).wrapping_add(1))
-            ^ self
-                .seed
-                .rotate_right(x.checked_rem(self.seed).unwrap_or(1))
+        let mut a = x.wrapping_mul(4294967291);
+        a = a.wrapping_add(self.seed);
+        a = a.wrapping_pow(5);
+        a ^= a.rotate_right(5);
+        a ^= a.rotate_left(9);
+        a
     }
 
     #[allow(clippy::should_implement_trait)]
