@@ -81,6 +81,9 @@ impl Game for PerlinExample {
             self.cam_angle += TAU / 2.0 * delta_time;
             cam_move = true;
         }
+        if input.is_key(Key::Char('r'), InputState::Pressed) {
+            self.renderer.models[0].set_transforms(terrain_transforms(&Noise::new()));
+        }
         if input.is_key(Key::Escape, InputState::Pressed) {
             data.exit(None);
         }
