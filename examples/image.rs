@@ -1,6 +1,5 @@
-use glam::Mat4;
 use rhachis::{
-    renderers::{Model, SimpleRenderer, Texture, Transform},
+    renderers::{Model, SimpleProjection, SimpleRenderer, Texture, Transform},
     Game, GameExt,
 };
 
@@ -11,10 +10,7 @@ struct Image {
 
 impl Game for Image {
     fn init(data: &rhachis::GameData) -> Self {
-        let mut renderer = SimpleRenderer::new(
-            data,
-            Mat4::orthographic_lh(-2.0, 2.0, -1.0, 1.0, -0.1, 100.0),
-        );
+        let mut renderer = SimpleRenderer::new(data, SimpleProjection::Orthographic);
         renderer.models.push(Model::quad_texture(
             data,
             Texture::new(

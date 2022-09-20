@@ -14,9 +14,10 @@ use graphics::{Graphics, Renderer};
 use input::Input;
 use parking_lot::Mutex;
 use winit::{
+    dpi::PhysicalSize,
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::{Window, WindowBuilder}, dpi::PhysicalSize,
+    window::{Window, WindowBuilder},
 };
 
 pub use run_macro::run;

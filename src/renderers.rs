@@ -1,4 +1,4 @@
-use std::{fmt::Debug, mem::size_of, num::NonZeroU32, path::Path};
+use std::{f32::consts::TAU, fmt::Debug, mem::size_of, num::NonZeroU32, path::Path};
 
 use anyhow::Result;
 use glam::{Mat4, Quat, Vec3};
@@ -9,6 +9,34 @@ use wgpu::{
 };
 
 use crate::{graphics::Renderer, GameData};
+
+pub enum SimpleProjection {
+    Orthographic,
+    Perspective { aspect_ratio: f32 },
+    Other(Mat4),
+}
+
+impl SimpleProjection {
+    pub fn new_perspective(data: &GameData) -> Self {
+        let size = data.window.lock().inner_size();
+        let aspect_ratio = size.width as f32 / size.height as f32;
+        Self::Perspective { aspect_ratio }
+    }
+}
+
+impl From<SimpleProjection> for Mat4 {
+    fn from(proj: SimpleProjection) -> Self {
+        match proj {
+            SimpleProjection::Orthographic => {
+                Mat4::orthographic_rh(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0)
+            }
+            SimpleProjection::Perspective { aspect_ratio } => {
+                Mat4::perspective_rh(TAU / 4.0, aspect_ratio, 0.1, 100.0)
+            }
+            SimpleProjection::Other(proj) => proj,
+        }
+    }
+}
 
 pub struct SimpleRenderer {
     color_pipeline: RenderPipeline,
@@ -22,7 +50,8 @@ pub struct SimpleRenderer {
 }
 
 impl SimpleRenderer {
-    pub fn new(data: &GameData, projection: Mat4) -> Self {
+    pub fn new(data: &GameData, projection: SimpleProjection) -> Self {
+        let projection = Mat4::from(projection);
         let projection_bind_group_layout = Self::mat4_bind_group_layout(data);
 
         let projection_buffer =

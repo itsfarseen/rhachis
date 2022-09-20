@@ -4,7 +4,7 @@ use glam::{Mat4, Quat, Vec2, Vec3};
 use rhachis::{
     input::{InputState, Key},
     rand::{perlin_2d, Noise},
-    renderers::{Model, SimpleRenderer, Transform},
+    renderers::{Model, SimpleProjection, SimpleRenderer, Transform},
     Game, GameData, GameExt,
 };
 
@@ -34,12 +34,16 @@ struct PerlinExample {
 
 impl Game for PerlinExample {
     fn init(data: &GameData) -> Self {
-        data.window.lock().set_fullscreen(Some(winit::window::Fullscreen::Borderless(None)));
+        data.window
+            .lock()
+            .set_fullscreen(Some(winit::window::Fullscreen::Borderless(None)));
         let cam_distance = 2.0;
         let cam_angle = 0.0;
 
-        let mut renderer =
-            SimpleRenderer::new(data, make_projection(data, cam_distance, cam_angle));
+        let mut renderer = SimpleRenderer::new(
+            data,
+            SimpleProjection::Other(make_projection(data, cam_distance, cam_angle)),
+        );
 
         renderer.models.push(
             Model::from_obj(
