@@ -16,7 +16,7 @@ use parking_lot::Mutex;
 use winit::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::{Window, WindowBuilder},
+    window::{Window, WindowBuilder}, dpi::PhysicalSize,
 };
 
 pub use run_macro::run;
@@ -34,6 +34,11 @@ impl GameData {
     pub fn get_window_size(&self) -> UVec2 {
         let size = self.window.lock().inner_size();
         UVec2::new(size.width, size.height)
+    }
+
+    pub fn set_window_size(&self, size: UVec2) {
+        let size = PhysicalSize::new(size.x, size.y);
+        self.window.lock().set_inner_size(size);
     }
 
     pub fn exit(&self, code: Option<i32>) {
