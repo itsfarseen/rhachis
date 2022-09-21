@@ -108,8 +108,8 @@ fn terrain_transforms(noise: &Noise) -> Vec<Transform> {
 
     for x in 0..30 {
         for y in 0..30 {
-            let pos = Vec2::new(x as f32, y as f32) / 2.5;
-            let height = perlin_2d(noise, pos);
+            let pos = Vec2::new(x as f32, y as f32) / 15.0;
+            let height = (perlin_2d(noise, pos) * 10.0).floor();
 
             to_ret.push(
                 Transform::translation((x as f32, height - 2.0, -(y as f32 + 3.0)).into())

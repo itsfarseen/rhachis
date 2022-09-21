@@ -69,32 +69,39 @@ impl Default for Noise {
 }
 
 pub fn perlin_2d(noise: &Noise, pos: Vec2) -> f32 {
-    fn dot_gradient(noise: &Noise, cell: Vec2, pos: Vec2) -> f32 {
-        let gradient = Vec2::new(
-            noise.get(2 * cell.x as u32) as f32,
-            noise.get(2 * cell.x as u32 + 1) as f32,
-        )
-        .normalize();
+    fn get_gradient(noise: &Noise, grid_pos: Vec2) -> Vec2 {
+        let grid_pos = grid_pos.as_uvec2();
 
-        let distance_vector = pos - cell;
+        let x_noise = noise.get(grid_pos.x * 2) as f32 - u32::MAX as f32 / 2.0;
+        let y_noise = noise.get(grid_pos.y * 2 + 1) as f32 - u32::MAX as f32 / 2.0;
 
-        distance_vector.dot(gradient)
+        Vec2::new(x_noise, y_noise).normalize()
     }
 
-    let grid_cell_start = pos.floor();
-    let grid_cell_end = grid_cell_start + Vec2::new(1.0, 1.0);
+    let grid_pos = pos.floor();
+    let offset_pos = pos - grid_pos;
 
-    let lerp_weights = pos - grid_cell_start;
+    let gradient_top_left = get_gradient(noise, grid_pos);
+    let gradient_top_right = get_gradient(noise, grid_pos + Vec2::new(1.0, 0.0));
+    let gradient_bottom_left = get_gradient(noise, grid_pos + Vec2::new(0.0, 1.0));
+    let gradient_bottom_right = get_gradient(noise, grid_pos + Vec2::new(1.0, 1.0));
 
-    let top_left_gradient = dot_gradient(noise, grid_cell_start, pos);
-    let top_right_gradient =
-        dot_gradient(noise, Vec2::new(grid_cell_start.x, grid_cell_end.y), pos);
-    let bottom_left_gradient =
-        dot_gradient(noise, Vec2::new(grid_cell_end.x, grid_cell_start.y), pos);
-    let bottom_right_gradient = dot_gradient(noise, grid_cell_end, pos);
+    dbg!(pos);
+    dbg!(gradient_top_left, gradient_top_right);
 
-    let top_lerp = lerp(top_left_gradient, top_right_gradient, lerp_weights.x);
-    let bottom_lerp = lerp(bottom_left_gradient, bottom_right_gradient, lerp_weights.x);
+    let difference_top_left = pos - grid_pos;
+    let difference_top_right = pos - grid_pos + Vec2::new(1.0, 0.0);
+    let difference_bottom_left = pos - grid_pos + Vec2::new(0.0, 1.0);
+    let difference_bottom_right = pos - grid_pos + Vec2::new(1.0, 1.0);
 
-    lerp(top_lerp, bottom_lerp, lerp_weights.y)
+    let influence_top_left = gradient_top_left.dot(difference_top_left);
+    let influence_top_right = gradient_top_right.dot(difference_top_right);
+    let influence_bottom_left = gradient_bottom_left.dot(difference_bottom_left);
+    let influence_bottom_right = gradient_bottom_right.dot(difference_bottom_right);
+
+    lerp(
+        lerp(influence_top_left, influence_top_right, offset_pos.x),
+        lerp(influence_bottom_left, influence_bottom_right, offset_pos.x),
+        offset_pos.y
+    )
 }
