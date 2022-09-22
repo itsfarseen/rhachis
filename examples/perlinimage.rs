@@ -21,9 +21,8 @@ impl Game for PerlinImage {
 
         for x in 0..IMAGE_WIDTH {
             for y in 0..IMAGE_HEIGHT {
-                let perlin = perlin_2d(&noise, Vec2::new(x as f32, y as f32) / 30.0, lerp);
-                let value = (perlin * 255.0) as u8;
-                //let value = noise.get_range(x * IMAGE_HEIGHT + y, 0..256) as u8;
+                let perlin = perlin_2d(&noise, Vec2::new(x as f32, y as f32) / 50.0, lerp);
+                let value = ((perlin + 1.0) * 127.0) as u8;
                 image.put_pixel(x, y, Rgba([value, value, value, 255]));
             }
         }

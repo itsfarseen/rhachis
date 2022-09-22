@@ -1,6 +1,7 @@
 //! Random generation functions convenient for game development.
 
 use std::{
+    f32::consts::TAU,
     ops::{Bound, RangeBounds},
     time::SystemTime,
 };
@@ -96,10 +97,9 @@ pub fn perlin_2d<F: Fn(f32, f32, f32) -> f32>(noise: &Noise, pos: Vec2, interpol
     fn get_gradient(noise: &Noise, grid_pos: Vec2) -> Vec2 {
         let grid_pos = grid_pos.as_uvec2();
 
-        let x_noise = noise.get(grid_pos.x * 2) as f32 - u32::MAX as f32 / 2.0;
-        let y_noise = noise.get(grid_pos.y * 2 + 1) as f32 - u32::MAX as f32 / 2.0;
+        let angle = TAU * 1000.0 / noise.get_range(noise.get(grid_pos.x) ^ grid_pos.y, 1..6283) as f32;
 
-        Vec2::new(x_noise, y_noise).normalize()
+        Vec2::new(angle.sin(), angle.cos())
     }
 
     let grid_pos = pos.floor();
