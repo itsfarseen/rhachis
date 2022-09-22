@@ -37,11 +37,13 @@ impl Noise {
 
     /// Get a pseudorandom number associated with the value `x`.
     pub fn get(&self, x: u32) -> u32 {
-        let mut a = x.wrapping_mul(4294967291);
-        a = a.wrapping_add(self.seed);
-        a = a.wrapping_pow(5);
-        a ^= a.rotate_right(5);
-        a ^= a.rotate_left(9);
+        let mut a = x.rotate_right(13).wrapping_pow(x);
+        a = a.wrapping_mul(a.wrapping_mul(self.seed));
+        a = a.wrapping_add(19990303);
+        a = a.wrapping_mul(a.rotate_left(8));
+        a = a.wrapping_pow(self.seed.wrapping_pow(x));
+        a = a.wrapping_add(1376312589);
+        a = a.wrapping_pow(4);
         a
     }
 
