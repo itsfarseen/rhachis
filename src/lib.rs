@@ -30,18 +30,25 @@ pub struct GameData {
     pub delta_time: Duration,
     /// The time that the game started running.
     pub start_time: Instant,
+    /// A handle to the graphics handler.
     pub graphics: Arc<Mutex<Graphics>>,
+    /// A handle to the input handler.
     pub input: Arc<Mutex<Input>>,
+    /// A handle to the winit window.
     pub window: Arc<Mutex<Window>>,
+    /// A handle to the Exit code. It is recommended to use `GameData::exit` instead
+    /// of directly modifying this value.
     pub exit_code: Arc<Mutex<Option<i32>>>,
 }
 
 impl GameData {
+    /// Returns the size of the window being drawn to.
     pub fn get_window_size(&self) -> UVec2 {
         let size = self.window.lock().inner_size();
         UVec2::new(size.width, size.height)
     }
 
+    /// Sets the size of the window being drawn to.
     pub fn set_window_size(&self, size: UVec2) {
         let size = PhysicalSize::new(size.x, size.y);
         self.window.lock().set_inner_size(size);
@@ -68,9 +75,10 @@ pub trait Game {
     fn handle_event(&mut self, data: &GameData, event: Event<()>) {}
 }
 
-/// Automatically implemented on everything that implements `Game`. The `run` function must be
-/// used to start the game.
+/// Automatically implemented on everything that implements `Game`.
 pub trait GameExt {
+    /// Starts the game. This function never returns; code put after it will not
+    /// be executed when the game quits.
     fn run();
 }
 
