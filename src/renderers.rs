@@ -44,10 +44,10 @@ impl From<SimpleProjection> for Mat4 {
     fn from(proj: SimpleProjection) -> Self {
         match proj {
             SimpleProjection::Orthographic => {
-                Mat4::orthographic_rh(-1.0, 1.0, -1.0, 1.0, 0.1, 100.0)
+                Mat4::orthographic_rh(-1.0, 1.0, -1.0, 1.0, 0.0, 100.0)
             }
             SimpleProjection::Perspective { aspect_ratio } => {
-                Mat4::perspective_rh(TAU / 4.0, aspect_ratio, 0.1, 100.0)
+                Mat4::perspective_rh(TAU / 4.0, aspect_ratio, 0.0, 100.0)
             }
             SimpleProjection::Other(proj) => proj,
         }
