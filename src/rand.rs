@@ -5,8 +5,6 @@ use std::{
 
 use glam::Vec2;
 
-use crate::math::lerp;
-
 pub struct Noise {
     pub seed: u32,
     pub index: u32,
@@ -68,7 +66,7 @@ impl Default for Noise {
     }
 }
 
-pub fn perlin_2d(noise: &Noise, pos: Vec2) -> f32 {
+pub fn perlin_2d<F: Fn(f32, f32, f32) -> f32>(noise: &Noise, pos: Vec2, interpolate: F) -> f32 {
     fn get_gradient(noise: &Noise, grid_pos: Vec2) -> Vec2 {
         let grid_pos = grid_pos.as_uvec2();
 
@@ -96,9 +94,9 @@ pub fn perlin_2d(noise: &Noise, pos: Vec2) -> f32 {
     let influence_bottom_left = gradient_bottom_left.dot(difference_bottom_left);
     let influence_bottom_right = gradient_bottom_right.dot(difference_bottom_right);
 
-    lerp(
-        lerp(influence_top_left, influence_top_right, offset_pos.x),
-        lerp(influence_bottom_left, influence_bottom_right, offset_pos.x),
-        offset_pos.y
+    interpolate(
+        interpolate(influence_top_left, influence_top_right, offset_pos.x),
+        interpolate(influence_bottom_left, influence_bottom_right, offset_pos.x),
+        offset_pos.y,
     )
 }

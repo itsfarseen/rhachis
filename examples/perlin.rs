@@ -3,6 +3,7 @@ use std::f32::consts::TAU;
 use glam::{Mat4, Quat, Vec2, Vec3};
 use rhachis::{
     input::{InputState, Key},
+    math::smootherstep,
     rand::{perlin_2d, Noise},
     renderers::{Model, SimpleProjection, SimpleRenderer, Transform},
     Game, GameData, GameExt,
@@ -106,10 +107,11 @@ impl Game for PerlinExample {
 fn terrain_transforms(noise: &Noise) -> Vec<Transform> {
     let mut to_ret = Vec::new();
 
-    for x in 0..30 {
-        for y in 0..30 {
-            let pos = Vec2::new(x as f32, y as f32) / 15.0;
-            let height = (perlin_2d(noise, pos) * 10.0).floor();
+    for x in 0..90 {
+        for y in 0..90 {
+            let pos = Vec2::new(x as f32, y as f32);
+            let height = (perlin_2d(noise, pos / 20.0, smootherstep) * 10.0).floor()
+                + (perlin_2d(noise, pos / 10.0, smootherstep) * 3.0).floor();
 
             to_ret.push(
                 Transform::translation((x as f32, height - 2.0, -(y as f32 + 3.0)).into())
