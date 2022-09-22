@@ -86,13 +86,10 @@ pub fn perlin_2d(noise: &Noise, pos: Vec2) -> f32 {
     let gradient_bottom_left = get_gradient(noise, grid_pos + Vec2::new(0.0, 1.0));
     let gradient_bottom_right = get_gradient(noise, grid_pos + Vec2::new(1.0, 1.0));
 
-    dbg!(pos);
-    dbg!(gradient_top_left, gradient_top_right);
-
     let difference_top_left = pos - grid_pos;
-    let difference_top_right = pos - grid_pos + Vec2::new(1.0, 0.0);
-    let difference_bottom_left = pos - grid_pos + Vec2::new(0.0, 1.0);
-    let difference_bottom_right = pos - grid_pos + Vec2::new(1.0, 1.0);
+    let difference_top_right = pos - (grid_pos + Vec2::new(1.0, 0.0));
+    let difference_bottom_left = pos - (grid_pos + Vec2::new(0.0, 1.0));
+    let difference_bottom_right = pos - (grid_pos + Vec2::new(1.0, 1.0));
 
     let influence_top_left = gradient_top_left.dot(difference_top_left);
     let influence_top_right = gradient_top_right.dot(difference_top_right);
