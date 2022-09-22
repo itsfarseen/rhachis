@@ -5,6 +5,7 @@ license = "MIT"
 version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/SalsaGal/rhachis"
+keywords = ["gamedev"]
 
 [dependencies]
 bytemuck = { version = "1.12.1", features = ["derive"] }
