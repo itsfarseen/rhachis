@@ -53,6 +53,7 @@ impl GameData {
         self.window.lock().set_inner_size(size);
     }
 
+    /// Return the number of frames per second for this frame.
     pub fn get_framerate(&self) -> f32 {
         1000.0 / self.delta_time.as_millis() as f32
     }
