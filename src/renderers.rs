@@ -24,7 +24,7 @@ pub enum SimpleProjection {
     /// Use `SimpleProjection::new_perspective` to avoid setting `aspect_ratio`.
     Perspective {
         /// The aspect ratio of the screen.
-        aspect_ratio: f32
+        aspect_ratio: f32,
     },
     /// A custom projection matrix.
     Other(Mat4),
