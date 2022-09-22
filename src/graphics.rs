@@ -1,3 +1,5 @@
+//! Code specialised in handling graphics. Most of this is universally applicable.
+
 use wgpu::{CommandEncoder, Device, Queue, RenderPass, Surface, SurfaceConfiguration, TextureView};
 use winit::{dpi::PhysicalSize, window::Window};
 

@@ -1,3 +1,5 @@
+//! Interacting with user keyboard or mouse inputs.
+
 use std::collections::HashMap;
 
 use winit::dpi::PhysicalPosition;

@@ -1,3 +1,9 @@
+//! A collection of rendering structs that could be used for simple
+//! or temporary parts of a pipeline.
+//!
+//! Enough code is written for this module to have an entire functional pipeline,
+//! but only pieces may be used if needed.
+
 use std::{f32::consts::TAU, fmt::Debug, mem::size_of, num::NonZeroU32, path::Path};
 
 use anyhow::Result;
@@ -10,6 +16,7 @@ use wgpu::{
 
 use crate::{graphics::Renderer, GameData};
 
+/// An enum offering simpler projection description for renderers.
 pub enum SimpleProjection {
     Orthographic,
     Perspective { aspect_ratio: f32 },
