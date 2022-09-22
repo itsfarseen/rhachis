@@ -22,8 +22,11 @@ use winit::{
 
 pub use rhachis_run_macro::run;
 
+/// A struct containing most of the global state of the engine.
 pub struct GameData {
+    /// Time since the last call of `Game::update`.
     pub delta_time: Duration,
+    /// The time that the game started running.
     pub start_time: Instant,
     pub graphics: Arc<Mutex<Graphics>>,
     pub input: Arc<Mutex<Input>>,
@@ -42,19 +45,29 @@ impl GameData {
         self.window.lock().set_inner_size(size);
     }
 
+    /// Quits the game upon next program update. If `code` is `Some`, then it is the
+    /// exit code, otherwise the exit code is 0.
     pub fn exit(&self, code: Option<i32>) {
         *self.exit_code.lock() = Some(code.unwrap_or_default());
     }
 }
 
 #[allow(unused)]
+/// A trait that all games must implement to use Rhachis
 pub trait Game {
+    /// Called when the game starts as a constructor for the initial state.
     fn init(data: &GameData) -> Self;
+    /// Used to get the renderer when graphics need to be drawn.
     fn get_renderer(&mut self) -> &mut dyn Renderer;
+    /// Called every update. Game logic should be handled here
     fn update(&mut self, data: &GameData) {}
+    /// Called after every event is handled by the engine in case special behaviour
+    /// is required for an event.
     fn handle_event(&mut self, data: &GameData, event: Event<()>) {}
 }
 
+/// Automatically implemented on everything that implements `Game`. The `run` function must be
+/// used to start the game.
 pub trait GameExt {
     fn run();
 }
