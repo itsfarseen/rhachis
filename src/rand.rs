@@ -87,8 +87,10 @@ impl Default for Noise {
 ///
 /// ## Example:
 /// ```
+/// use rhachis::rand::{Noise, perlin_2d};
+///
 /// let noise = Noise::new();
-/// let height = perlin_2d(noise, (1.0, 1.0).into(), rhachis::math::lerp);
+/// let height = perlin_2d(&noise, (1.0, 1.0).into(), rhachis::math::lerp);
 /// ```
 pub fn perlin_2d<F: Fn(f32, f32, f32) -> f32>(noise: &Noise, pos: Vec2, interpolate: F) -> f32 {
     fn get_gradient(noise: &Noise, grid_pos: Vec2) -> Vec2 {
