@@ -5,6 +5,7 @@ use winit::{dpi::PhysicalSize, window::Window};
 
 use crate::GameData;
 
+/// A handler over all core graphics components.
 pub struct Graphics {
     pub device: Device,
     pub queue: Queue,
@@ -13,7 +14,7 @@ pub struct Graphics {
 }
 
 impl Graphics {
-    pub async fn new(window: &Window) -> Self {
+    pub(crate) async fn new(window: &Window) -> Self {
         let size = window.inner_size();
 
         let instance = wgpu::Instance::new(wgpu::Backends::all());
@@ -83,7 +84,10 @@ impl Graphics {
 }
 
 #[allow(unused)]
+/// This trait must be implemented on all renderers. It exposes API for rendering a frame.
 pub trait Renderer {
+    /// Make the default render pass. Most simple renderers don't need to replace this.
+    /// This is called at the beginning of each frame.
     fn make_render_pass<'a>(
         &'a self,
         view: &'a TextureView,
@@ -103,11 +107,17 @@ pub trait Renderer {
         })
     }
 
+    /// This is called every frame once the renderpass has been created.
     fn render(&self, render_pass: RenderPass) {}
+    /// This is called every frame after the game updates. This is for any state that the renderer
+    /// itself will have to maintain.
     fn update(&mut self, data: &GameData) {}
+    /// This is called when the canvas is resized. This is for things such as updating the size of
+    /// a perspective projection aspect ratio.
     fn resize(&mut self, data: &GameData) {}
 }
 
+/// A renderer that does nothing, useful for some tests.
 pub struct EmptyRenderer;
 
 impl Renderer for EmptyRenderer {}
