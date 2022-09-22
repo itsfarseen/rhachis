@@ -1,5 +1,5 @@
 [default]
-cargo run --example perlin
+cargo run --example perlinimage
 
 [check]
 cargo clippy --examples && cargo fmt
