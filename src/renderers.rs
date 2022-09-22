@@ -737,8 +737,8 @@ macro_rules! transform_methods {
     ($($i: ident: $t: ty),*) => {
         $(
             paste::paste! {
-                pub fn [<set_ $i>](&mut self, $i: $t) {
-                    self.$i = $i;
+                pub fn [<$i _mut>](&mut self) -> &mut $t {
+                    &mut self.$i
                 }
 
                 pub fn [<with_ $i>](mut self, $i: $t) -> Self {
@@ -761,8 +761,8 @@ macro_rules! with_set_translation {
     ($($i: ident),*) => {
         $(
             paste::paste! {
-                pub fn [<set_ $i>](&mut self, $i: f32) {
-                    self.translation.$i = $i;
+                pub fn [<$i _mut>](&mut self) -> &mut f32 {
+                    &mut self.translation.$i
                 }
 
                 pub fn [<with_ $i>](mut self, $i: f32) -> Self {
