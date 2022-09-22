@@ -18,12 +18,21 @@ use crate::{graphics::Renderer, GameData};
 
 /// An enum offering simpler projection description for renderers.
 pub enum SimpleProjection {
+    /// A projection with no perspective. Useful for 2D games.
     Orthographic,
-    Perspective { aspect_ratio: f32 },
+    /// A projection which distorts positions to look realistic and 3D.
+    /// Use `SimpleProjection::new_perspective` to avoid setting `aspect_ratio`.
+    Perspective {
+        /// The aspect ratio of the screen.
+        aspect_ratio: f32
+    },
+    /// A custom projection matrix.
     Other(Mat4),
 }
 
 impl SimpleProjection {
+    /// Returns a `SimpleProjection::Perspective` with an automatically determined
+    /// `aspect_ratio`.
     pub fn new_perspective(data: &GameData) -> Self {
         let size = data.window.lock().inner_size();
         let aspect_ratio = size.width as f32 / size.height as f32;
@@ -45,18 +54,25 @@ impl From<SimpleProjection> for Mat4 {
     }
 }
 
+/// A simple renderer with pipelines for both color vertices and texture vertices. No
+/// lighting is performed.
 pub struct SimpleRenderer {
     color_pipeline: RenderPipeline,
     texture_pipeline: RenderPipeline,
     projection_buffer: Buffer,
     projection_bind_group: BindGroup,
+    /// A view of the depth texture.
     pub depth_texture_view: TextureView,
+    /// A sampler for nearest filters (magnified textures looked pixelated).
     pub nearest_sampler: Sampler,
+    /// A sampler for linear filters (magnified textures looked blurry).
     pub linear_sampler: Sampler,
+    /// A list of all `Model`s that will be rendered.
     pub models: Vec<Model>,
 }
 
 impl SimpleRenderer {
+    /// Create a `SimpleRenderer`.
     pub fn new(data: &GameData, projection: SimpleProjection) -> Self {
         let projection = Mat4::from(projection);
         let projection_bind_group_layout = Self::mat4_bind_group_layout(data);
@@ -96,6 +112,8 @@ impl SimpleRenderer {
         }
     }
 
+    /// Replaces the projection of the renderer and updates its
+    /// buffer
     pub fn set_projection(&mut self, data: &GameData, projection: Mat4) {
         data.graphics.lock().queue.write_buffer(
             &self.projection_buffer,
@@ -104,6 +122,7 @@ impl SimpleRenderer {
         )
     }
 
+    /// Makes the default color pipeline.
     pub fn color_pipeline(data: &GameData) -> RenderPipeline {
         let shader =
             data.graphics
@@ -173,6 +192,7 @@ impl SimpleRenderer {
             })
     }
 
+    /// Makes the default color pipeline.
     pub fn texture_pipeline(data: &GameData) -> RenderPipeline {
         let texture_bind_group_layout = Texture::bind_group_layout(data);
 
@@ -244,6 +264,7 @@ impl SimpleRenderer {
             })
     }
 
+    /// Makes the default linear sampler.
     pub fn linear_sampler(data: &GameData) -> Sampler {
         data.graphics
             .lock()
@@ -258,6 +279,7 @@ impl SimpleRenderer {
             })
     }
 
+    /// Makes the default nearest sampler.
     pub fn nearest_sampler(data: &GameData) -> Sampler {
         data.graphics
             .lock()
@@ -272,6 +294,7 @@ impl SimpleRenderer {
             })
     }
 
+    /// Makes the default 4x4 matrix bind group layout.
     pub fn mat4_bind_group_layout(data: &GameData) -> wgpu::BindGroupLayout {
         data.graphics
             .lock()
@@ -291,6 +314,7 @@ impl SimpleRenderer {
             })
     }
 
+    /// Makes the default `TextureView` of a depth texture.
     pub fn depth_texture(data: &GameData) -> TextureView {
         let width = data.graphics.lock().config.width;
         let height = data.graphics.lock().config.height;
@@ -376,12 +400,16 @@ impl Renderer for SimpleRenderer {
     }
 }
 
+/// A slice of any of the supported standard vertices.
 pub enum VertexSlice<'a> {
+    /// A wrapper around a slice of color vertices.
     ColorVertices(&'a [ColorVertex]),
+    /// A wrapper around a slice of texture vertices and also the texture that they map to.
     TextureVertices(&'a [TextureVertex], Texture),
 }
 
 impl VertexSlice<'_> {
+    /// Exposes the vertex list that wraps around it.
     pub fn contents(&self) -> &[u8] {
         match *self {
             Self::ColorVertices(vertices) => bytemuck::cast_slice(vertices),
@@ -390,8 +418,11 @@ impl VertexSlice<'_> {
     }
 }
 
+/// The type of vertex
 pub enum VertexType {
+    /// A vertex that features a position and a color.
     ColorVertex,
+    /// A vertex that features a position and a texture coordinate.
     TextureVertex(Texture),
 }
 
@@ -404,18 +435,33 @@ impl From<VertexSlice<'_>> for VertexType {
     }
 }
 
+/// A set of vertices and transforms for a 3D model.
 pub struct Model {
+    /// The list of vertices.
     pub vertex_buffer: Buffer,
+    /// The type of the vertices in `vertex_buffer`.
     pub vertex_type: VertexType,
+    /// The list of indices.
     pub index_buffer: Buffer,
+    /// The number of indices in `index_buffer`.
     pub index_count: u32,
+    /// The list of instances of the model that will be visible. Every
+    /// transform will be a new copy of the model without duplicating memory
+    /// use.
     pub transforms: Vec<Transform>,
+    /// When a transform is modified then this is set to `true`. Whenever the model is
+    /// next rendered it will rebuild the buffer and set this to `false`.
     pub transforms_outdated: bool,
+    /// The handle to the transform buffer.
     pub transform_buffer: Buffer,
+    /// The count of the transforms on the buffer. This has to be included because
+    /// `transforms.len()` might be different to the previous size and then the buffer would need
+    /// to be reallocated.
     pub transform_count: u32,
 }
 
 impl Model {
+    /// Make a model from the described features.
     pub fn new(
         data: &GameData,
         vertices: VertexSlice,
@@ -467,6 +513,7 @@ impl Model {
         }
     }
 
+    /// Load a model from an obj file.
     pub fn from_obj<P: AsRef<Path> + Debug>(
         data: &GameData,
         path: P,
@@ -540,6 +587,7 @@ impl Model {
         Ok(to_ret)
     }
 
+    /// Makes a model that is a plain white square.
     pub fn quad(data: &GameData, transforms: Vec<Transform>) -> Self {
         Self::new(
             data,
@@ -566,6 +614,7 @@ impl Model {
         )
     }
 
+    /// Makes a model that is a square with a texture on it.
     pub fn quad_texture(data: &GameData, texture: Texture, transforms: Vec<Transform>) -> Self {
         Self::new(
             data,
@@ -595,6 +644,8 @@ impl Model {
         )
     }
 
+    /// Put values of the transforms from the `Vec` on the struct to the
+    /// actual buffer for rendering.
     pub fn update_transforms(&mut self, data: &GameData) {
         if self.transforms.len() as u32 != self.transform_count {
             self.transform_buffer =
@@ -630,33 +681,40 @@ impl Model {
         self.transforms_outdated = false;
     }
 
+    /// Modified the value of the transform and marks it as outdated.
     pub fn set_transform(&mut self, index: usize, transform: Transform) {
         *self.transforms.get_mut(index).unwrap() = transform;
         self.transforms_outdated = true;
     }
 
+    /// Modified the value of the transform, marks it as outdated, then returns the model.
     pub fn with_transform(mut self, index: usize, transform: Transform) -> Self {
         *self.transforms.get_mut(index).unwrap() = transform;
         self.transforms_outdated = true;
         self
     }
 
+    /// Modified the value of the transforms and marks it as outdated.
     pub fn set_transforms(&mut self, transforms: Vec<Transform>) {
         self.transforms = transforms;
         self.transforms_outdated = true;
     }
 
+    /// Modified the value of the transforms, marks it as outdated, then returns the model.
     pub fn with_transforms(mut self, transforms: Vec<Transform>) -> Self {
         self.transforms = transforms;
         self.transforms_outdated = true;
         self
     }
 
+    /// Calls the function `modify` on the list of transforms and marks it as outdated.
     pub fn modify_transforms<F: FnOnce(&mut [Transform])>(&mut self, modify: F) {
         modify(&mut self.transforms);
         self.transforms_outdated = true;
     }
 
+    /// Calls the function `modify` on the list of transforms, marks it as outdated, then returns
+    /// the model.
     pub fn with_modify_transforms<F: FnOnce(&mut [Transform])>(mut self, modify: F) -> Self {
         modify(&mut self.transforms);
         self.transforms_outdated = true;
@@ -665,9 +723,13 @@ impl Model {
 }
 
 #[derive(Clone, Copy, Debug)]
+/// A set of modifications to a model's vertices.
 pub struct Transform {
+    /// The value that each vertex has added to it.
     pub translation: Vec3,
+    /// The rotation of a vertex from the model's origin.
     pub rotation: Quat,
+    /// THe value that each vertex is mulitplied again.
     pub scale: Vec3,
 }
 
@@ -717,6 +779,7 @@ impl Transform {
 
     with_set_translation!(x, y, z);
 
+    /// Construct matrices from transform values.
     pub fn matrix(&self) -> [[f32; 4]; 4] {
         Mat4::from_scale_rotation_translation(self.scale, self.rotation, self.translation)
             .to_cols_array_2d()
