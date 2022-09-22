@@ -1,3 +1,5 @@
+//! Random generation functions convenient for game development.
+
 use std::{
     ops::{Bound, RangeBounds},
     time::SystemTime,
@@ -5,12 +7,19 @@ use std::{
 
 use glam::Vec2;
 
+/// A random number generator that can produce consistent but still unpredictable outputs given
+/// the same inputs. Useful for perlin noise generation.
 pub struct Noise {
+    /// The seed used to make generated numbers unique.
     pub seed: u32,
+    /// The counter for `Noise::next` and `Noise::next_range`.
     pub index: u32,
 }
 
 impl Noise {
+    /// Create a `Noise` instance. The seed is set to the number of seconds since the unix epoch.
+    /// To avoid epochalypse problems, it actually returns `seconds % u32::MAX` so it will
+    /// wrap around once it runs out of 32 bit numbers
     pub fn new() -> Noise {
         let seed = (SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
@@ -21,10 +30,12 @@ impl Noise {
         Self { seed, index: 0 }
     }
 
+    /// Create a `Noise` instance with seed already decided.
     pub fn from_seed(seed: u32) -> Noise {
         Self { seed, index: 0 }
     }
 
+    /// Get a pseudorandom number associated with the value `x`.
     pub fn get(&self, x: u32) -> u32 {
         let mut a = x.wrapping_mul(4294967291);
         a = a.wrapping_add(self.seed);
@@ -35,11 +46,14 @@ impl Noise {
     }
 
     #[allow(clippy::should_implement_trait)]
+    /// Get the next pseudorandom number. This increments an internal counter
+    /// and just returns the number calculated from the value of the counter.
     pub fn next(&mut self) -> u32 {
         self.index += 1;
         self.get(self.index)
     }
 
+    /// Get a pseudorandom number in the range of `range`.
     pub fn get_range<T: RangeBounds<u32>>(&self, index: u32, range: T) -> u32 {
         let start = match range.start_bound() {
             Bound::Included(x) => *x,
@@ -54,6 +68,7 @@ impl Noise {
         self.get(index) % (end - start) + start
     }
 
+    /// Get the next pseudorandom number in the range of `range`.
     pub fn next_range<T: RangeBounds<u32>>(&mut self, range: T) -> u32 {
         self.index += 1;
         self.get_range(self.index, range)
@@ -66,6 +81,15 @@ impl Default for Noise {
     }
 }
 
+/// Returns the value of `pos` on a 2D perlin noise functions. The interpolation function
+/// is left specified by the caller, but is typically one of the interpolation functions in
+/// `math`.
+///
+/// ## Example:
+/// ```
+/// let noise = Noise::new();
+/// let height = perlin_2d(noise, (1.0, 1.0).into(), rhachis::math::lerp);
+/// ```
 pub fn perlin_2d<F: Fn(f32, f32, f32) -> f32>(noise: &Noise, pos: Vec2, interpolate: F) -> f32 {
     fn get_gradient(noise: &Noise, grid_pos: Vec2) -> Vec2 {
         let grid_pos = grid_pos.as_uvec2();
