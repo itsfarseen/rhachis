@@ -8,6 +8,8 @@ use std::{
 
 use glam::Vec2;
 
+use crate::math::lerp;
+
 /// A random number generator that can produce consistent but still unpredictable outputs given
 /// the same inputs. Useful for perlin noise generation.
 pub struct Noise {
@@ -102,27 +104,31 @@ pub fn perlin_2d<F: Fn(f32, f32, f32) -> f32>(noise: &Noise, pos: Vec2, interpol
         Vec2::new(angle.sin(), angle.cos())
     }
 
-    let grid_pos = pos.floor();
-    let offset_pos = pos - grid_pos;
+    let corners = [
+        pos.floor(),
+        pos.floor() + Vec2::new(1.0, 0.0),
+        pos.floor() + Vec2::new(0.0, 1.0),
+        pos.floor() + Vec2::new(1.0, 1.0),
+    ];
 
-    let gradient_top_left = get_gradient(noise, grid_pos);
-    let gradient_top_right = get_gradient(noise, grid_pos + Vec2::new(1.0, 0.0));
-    let gradient_bottom_left = get_gradient(noise, grid_pos + Vec2::new(0.0, 1.0));
-    let gradient_bottom_right = get_gradient(noise, grid_pos + Vec2::new(1.0, 1.0));
+    let offsets = [
+        corners[0] - pos,
+        corners[1] - pos,
+        corners[2] - pos,
+        corners[3] - pos,
+    ];
 
-    let difference_top_left = pos - grid_pos;
-    let difference_top_right = pos - (grid_pos + Vec2::new(1.0, 0.0));
-    let difference_bottom_left = pos - (grid_pos + Vec2::new(0.0, 1.0));
-    let difference_bottom_right = pos - (grid_pos + Vec2::new(1.0, 1.0));
+    let influence = [
+        get_gradient(noise, corners[0]).dot(offsets[0]),
+        get_gradient(noise, corners[1]).dot(offsets[1]),
+        get_gradient(noise, corners[2]).dot(offsets[2]),
+        get_gradient(noise, corners[3]).dot(offsets[3]),
+    ];
 
-    let influence_top_left = gradient_top_left.dot(difference_top_left);
-    let influence_top_right = gradient_top_right.dot(difference_top_right);
-    let influence_bottom_left = gradient_bottom_left.dot(difference_bottom_left);
-    let influence_bottom_right = gradient_bottom_right.dot(difference_bottom_right);
-
+    let offset = pos - pos.floor();
     interpolate(
-        interpolate(influence_top_left, influence_top_right, offset_pos.x),
-        interpolate(influence_bottom_left, influence_bottom_right, offset_pos.x),
-        offset_pos.y,
+        interpolate(influence[0], influence[1], offset.x),
+        interpolate(influence[2], influence[3], offset.x),
+        offset.y,
     )
 }
