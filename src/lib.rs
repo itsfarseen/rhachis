@@ -20,7 +20,7 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
-pub use run_macro::run;
+pub use rhachis_run_macro::run;
 
 pub struct GameData {
     pub delta_time: Duration,
