@@ -1,5 +1,8 @@
+//! A collection of functions that are useful for games.
+
 use std::ops::{Add, Mul, Sub};
 
+/// An implementation of linear interpolation.
 pub fn lerp<T, U>(a: T, b: T, weight: U) -> T
 where
     T: Add<T, Output = T> + Sub<T, Output = T> + Mul<U, Output = T> + Copy,
@@ -7,6 +10,7 @@ where
     (b - a) * weight + a
 }
 
+/// An implementation of smoothstep interpolation.
 pub fn smoothstep<T, U>(a: T, b: T, weight: U) -> T
 where
     T: Add<T, Output = T> + Sub<T, Output = T> + Mul<U, Output = T> + Copy,
@@ -16,6 +20,7 @@ where
     (b - a) * (3.0 - weight * 2.0) * weight * weight + a
 }
 
+/// An implementation of smootherstep interpolation.
 pub fn smootherstep<T, U>(a: T, b: T, weight: U) -> T
 where
     T: Add<T, Output = T> + Sub<T, Output = T> + Mul<U, Output = T> + Copy,
