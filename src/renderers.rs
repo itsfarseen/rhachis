@@ -729,7 +729,7 @@ pub struct Transform {
     pub translation: Vec3,
     /// The rotation of a vertex from the model's origin.
     pub rotation: Quat,
-    /// THe value that each vertex is mulitplied again.
+    /// The value that each vertex is mulitplied again.
     pub scale: Vec3,
 }
 
