@@ -53,6 +53,10 @@ impl GameData {
         self.window.lock().set_inner_size(size);
     }
 
+    pub fn get_framerate(&self) -> f32 {
+        1000.0 / self.delta_time.as_millis() as f32
+    }
+
     /// Quits the game upon next program update. If `code` is `Some`, then it is the
     /// exit code, otherwise the exit code is 0.
     pub fn exit(&self, code: Option<i32>) {
