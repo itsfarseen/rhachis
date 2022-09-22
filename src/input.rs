@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use winit::dpi::PhysicalPosition;
 use winit::event::{ElementState, KeyboardInput, MouseButton, ScanCode};
 
+/// Handler of all user inputs.
 pub struct Input {
     /// The keys and their states.
     keys: HashMap<ScanCode, InputState>,
