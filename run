@@ -2,4 +2,4 @@
 cargo run --example perlinimage
 
 [check]
-cargo clippy --examples && cargo fmt
+cargo clippy --examples && cargo test && cargo fmt

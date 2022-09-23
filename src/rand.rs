@@ -97,7 +97,8 @@ pub fn perlin_2d<F: Fn(f32, f32, f32) -> f32>(noise: &Noise, pos: Vec2, interpol
     fn get_gradient(noise: &Noise, grid_pos: Vec2) -> Vec2 {
         let grid_pos = grid_pos.as_uvec2();
 
-        let angle = TAU * 1000.0 / noise.get_range(noise.get(grid_pos.x) ^ grid_pos.y, 1..6283) as f32;
+        let angle =
+            TAU * 1000.0 / noise.get_range(noise.get(grid_pos.x) ^ grid_pos.y, 1..6283) as f32;
 
         Vec2::new(angle.sin(), angle.cos())
     }

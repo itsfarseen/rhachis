@@ -10,6 +10,13 @@ where
     (b - a) * weight + a
 }
 
+#[test]
+fn lerp_test() {
+    assert_eq!(lerp(0.0, 1.0, 0.5), 0.5);
+    assert_eq!(lerp(0.5, 1.0, 0.5), 0.75);
+    assert_eq!(lerp(0.75, 100.0, 0.25), 25.5625);
+}
+
 /// An implementation of smoothstep interpolation.
 pub fn smoothstep<T, U>(a: T, b: T, weight: U) -> T
 where

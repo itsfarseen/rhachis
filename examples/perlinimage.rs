@@ -17,8 +17,9 @@ struct PerlinImage(SimpleRenderer);
 impl Game for PerlinImage {
     fn init(data: &rhachis::GameData) -> Self {
         data.set_window_size((IMAGE_WIDTH, IMAGE_HEIGHT).into());
+        data.window.lock().set_title("0xabadcafe");
 
-        let noise = Noise::new();
+        let noise = Noise::from_seed(0xabadcafe);
         let mut image = RgbaImage::new(IMAGE_WIDTH, IMAGE_HEIGHT);
 
         for x in 0..IMAGE_WIDTH {
@@ -36,9 +37,8 @@ impl Game for PerlinImage {
         renderer.models.push(Model::quad_texture(
             data,
             texture,
-            vec![
-                Transform::scale(Vec3::new(2.0, 2.0, 1.0)).with_translation(Vec3::new(-1.0, -1.0, 0.0))
-            ],
+            vec![Transform::scale(Vec3::new(2.0, 2.0, 1.0))
+                .with_translation(Vec3::new(-1.0, -1.0, 0.0))],
         ));
 
         Self(renderer)
