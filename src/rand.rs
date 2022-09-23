@@ -8,8 +8,6 @@ use std::{
 
 use glam::Vec2;
 
-use crate::math::lerp;
-
 /// A random number generator that can produce consistent but still unpredictable outputs given
 /// the same inputs. Useful for perlin noise generation.
 pub struct Noise {
