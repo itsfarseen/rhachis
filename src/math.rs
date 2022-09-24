@@ -36,7 +36,7 @@ where
         + Mul<f32, Output = U>
         + Sub<f32, Output = U>
         + Copy,
-    f32: Sub<U, Output = U> + Copy,
+    f32: Sub<U, Output = U>,
 {
     (b - a) * ((weight * (weight * 6.0 - 15.0) + 10.0) * weight * weight * weight) + a
 }
