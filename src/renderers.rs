@@ -4,7 +4,9 @@
 //! Enough code is written for this module to have an entire functional pipeline,
 //! but only pieces may be used if needed.
 
-use std::{f32::consts::TAU, fmt::Debug, mem::size_of, num::NonZeroU32, path::Path};
+use std::{
+    collections::HashMap, f32::consts::TAU, fmt::Debug, mem::size_of, num::NonZeroU32, path::Path, hash::Hash,
+};
 
 use anyhow::Result;
 use glam::{Mat4, Quat, Vec3};
@@ -922,6 +924,19 @@ impl Texture {
             });
 
         Texture { diffuse }
+    }
+
+    pub fn load<'a, P: AsRef<Path> + Clone + Eq + Hash>(
+        data: &GameData,
+        path: P,
+        cache: &'a mut HashMap<P, Texture>,
+        sampler: &Sampler,
+    ) -> &'a Texture {
+        cache.entry(path.clone()).or_insert_with(|| Texture::new(
+            data,
+            &image::open(path).unwrap(),
+            sampler
+        ))
     }
 
     pub fn bind_group_layout(data: &GameData) -> wgpu::BindGroupLayout {
