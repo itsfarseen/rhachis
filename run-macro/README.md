@@ -1,6 +1,6 @@
-# Run macro
+The run macro is a shorthand for making a main function.
 
-The run macro is a shorthand for making a main function. You use it by prefixing your `Game` implementing `struct` with `#[rhachis::run]`. The following code sample:
+You use it by prefixing your `Game` implementing `struct` with `#[rhachis::run]`. The following code sample:
 
 ```rust
 use rhachis::*;
