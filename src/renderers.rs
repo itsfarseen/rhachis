@@ -827,6 +827,7 @@ impl Default for Transform {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+/// A vertex used for colored models
 pub struct ColorVertex {
     pub pos: [f32; 3],
     pub color: [f32; 4],
@@ -953,6 +954,7 @@ impl Texture {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+/// A vertex used for textured models
 pub struct TextureVertex {
     pub pos: [f32; 3],
     pub tex_coords: [f32; 2],
