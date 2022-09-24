@@ -114,6 +114,10 @@ pub enum InputState {
     Released,
 }
 
+const INVALID_NUM: &str = "Invalid key number: ";
+const INVALID_FN: &str = "Invalid function number: ";
+const INVALID_CHAR: &str = "Invalid char: ";
+
 /// An abstraction of the keyboard scancode that automatically
 /// applies itself to the correct system's keyboard to scancode
 /// layout.
@@ -139,7 +143,7 @@ impl From<Key> for ScanCode {
                 if num < 10 {
                     num as u32 + 1
                 } else {
-                    panic!("Invalid key number {num}");
+                    panic!("{}{num}", INVALID_NUM);
                 }
             }
             Key::Char('-') => 12,
@@ -178,10 +182,10 @@ impl From<Key> for ScanCode {
                     11 => 87,
                     12 => 88,
                     13..=24 => num as u32 + 170,
-                    _ => panic!("Invalid function number {num}"),
+                    _ => panic!("{}{num}", INVALID_FN),
                 }
             },
-            Key::Char(key) => panic!("Invalid key {key}"),
+            Key::Char(key) => panic!("{}{key}", INVALID_CHAR),
             Key::Other(scancode) => scancode,
         }
     }
@@ -248,9 +252,9 @@ impl From<Key> for ScanCode {
             Key::Fn(2) => 120,
             Key::Fn(1) => 122,
 
-            Key::Fn(num) => panic!("Invalid function number {num}"),
-            Key::Num(num) => panic!("Invalid key number {num}"),
-            Key::Char(key) => panic!("Invalid key {key}"),
+            Key::Fn(num) => panic!("{}{num}", INVALID_FN),
+            Key::Num(num) => panic!("{}{num}", INVALID_NUM),
+            Key::Char(key) => panic!("{}{key}", INVALID_CHAR),
         }
     }
 
@@ -263,7 +267,7 @@ impl From<Key> for ScanCode {
                 if num < 10 {
                     num as u32 + 1
                 } else {
-                    panic!("Invalid key number {num}")
+                    panic!("{}{num}", INVALID_NUM)
                 }
             }
             Key::Char('-') => 12,
@@ -301,9 +305,9 @@ impl From<Key> for ScanCode {
                 11 => 0x57,
                 12 => 0x58,
                 13..=19 => num as u32 + 95,
-                _ => panic!("Invalid fn number {num}"),
+                _ => panic!("{}{num}", INVALID_FN),
             }
-            Key::Char(key) => panic!("Invalid key {key}"),
+            Key::Char(key) => panic!("{}{key}", INVALID_CHAR),
             Key::Other(scancode) => scancode,
         }
     }
