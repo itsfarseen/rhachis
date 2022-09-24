@@ -5,7 +5,8 @@
 //! but only pieces may be used if needed.
 
 use std::{
-    collections::HashMap, f32::consts::TAU, fmt::Debug, mem::size_of, num::NonZeroU32, path::Path, hash::Hash,
+    collections::HashMap, f32::consts::TAU, fmt::Debug, hash::Hash, mem::size_of, num::NonZeroU32,
+    path::Path,
 };
 
 use anyhow::Result;
@@ -932,11 +933,9 @@ impl Texture {
         cache: &'a mut HashMap<P, Texture>,
         sampler: &Sampler,
     ) -> &'a Texture {
-        cache.entry(path.clone()).or_insert_with(|| Texture::new(
-            data,
-            &image::open(path).unwrap(),
-            sampler
-        ))
+        cache
+            .entry(path.clone())
+            .or_insert_with(|| Texture::new(data, &image::open(path).unwrap(), sampler))
     }
 
     pub fn bind_group_layout(data: &GameData) -> wgpu::BindGroupLayout {

@@ -2,7 +2,7 @@ The run macro is a shorthand for making a main function.
 
 You use it by prefixing your `Game` implementing `struct` with `#[rhachis::run]`. The following code sample:
 
-```rust
+```rust,ignore
 use rhachis::*;
 use rhachis::graphics::EmptyRenderer;
 
@@ -16,7 +16,7 @@ impl Game for Run {
 
 is evaluated to:
 
-```rust
+```rust,ignore
 use rhachis::*;
 use rhachis::graphics::EmptyRenderer;
 
