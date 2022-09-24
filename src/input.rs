@@ -124,6 +124,7 @@ pub enum Key {
     Tab,
 
     Num(u8),
+    Fn(u8),
     Char(char),
     Other(ScanCode),
 }
@@ -171,6 +172,15 @@ impl From<Key> for ScanCode {
             Key::Char('b') => 48,
             Key::Char('n') => 49,
             Key::Char('m') => 50,
+            Key::Fn(num) => {
+                match num {
+                    1..=10 => num as u32 + 58,
+                    11 => 87,
+                    12 => 88,
+                    13..=24 => num as u32 + 170,
+                    _ => panic!("Invalid function number {num}"),
+                }
+            },
             Key::Char(key) => panic!("Invalid key {key}"),
             Key::Other(scancode) => scancode,
         }
@@ -221,7 +231,24 @@ impl From<Key> for ScanCode {
             Key::Backspace => 51,
             Key::Escape => 53,
             Key::Other(scancode) => scancode,
+            Key::Fn(17) => 64,
+            Key::Fn(18) => 79,
+            Key::Fn(19) => 80,
+            Key::Fn(5) => 96,
+            Key::Fn(6) => 97,
+            Key::Fn(7) => 98,
+            Key::Fn(3) => 99,
+            Key::Fn(8) => 100,
+            Key::Fn(9) => 101,
+            Key::Fn(11) => 103,
+            Key::Fn(16) => 106,
+            Key::Fn(10) => 109,
+            Key::Fn(12) => 111,
+            Key::Fn(4) => 118,
+            Key::Fn(2) => 120,
+            Key::Fn(1) => 122,
 
+            Key::Fn(num) => panic!("Invalid function number {num}"),
             Key::Num(num) => panic!("Invalid key number {num}"),
             Key::Char(key) => panic!("Invalid key {key}"),
         }
@@ -269,6 +296,13 @@ impl From<Key> for ScanCode {
             Key::Char('b') => 48,
             Key::Char('n') => 49,
             Key::Char('m') => 50,
+            Key::Fn(num) => match num {
+                1..=10 => num as u32 + 0xa,
+                11 => 0x57,
+                12 => 0x58,
+                13..=19 => num as u32 + 95,
+                _ => panic!("Invalid fn number {num}"),
+            }
             Key::Char(key) => panic!("Invalid key {key}"),
             Key::Other(scancode) => scancode,
         }
