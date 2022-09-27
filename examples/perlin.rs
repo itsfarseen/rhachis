@@ -78,7 +78,7 @@ impl Game for PerlinExample {
             self.cam_distance += 4.0 * delta_time;
             cam_move = true;
         }
-        if input.is_key(Key::Char('a'), InputState::Down) && self.cam_distance > 1.0 {
+        if input.is_key(Key::Char('a'), InputState::Down) {
             self.cam_angle -= TAU / 2.0 * delta_time;
             cam_move = true;
         }
