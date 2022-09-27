@@ -133,6 +133,16 @@ impl SimpleRenderer {
         }
     }
 
+    /// Replaces the camera of the renderer and updates its
+    /// buffer
+    pub fn set_camera(&mut self, data: &GameData, camera: Mat4) {
+        data.graphics.lock().queue.write_buffer(
+            &self.camera_buffer,
+            1,
+            bytemuck::cast_slice(&[camera.to_cols_array_2d()]),
+        )
+    }
+
     /// Replaces the projection of the renderer and updates its
     /// buffer
     pub fn set_projection(&mut self, data: &GameData, projection: Mat4) {
