@@ -62,6 +62,7 @@ impl From<SimpleProjection> for Mat4 {
 pub struct SimpleRenderer {
     color_pipeline: RenderPipeline,
     texture_pipeline: RenderPipeline,
+    camera_buffer: Buffer,
     projection_buffer: Buffer,
     projection_bind_group: BindGroup,
     /// A view of the depth texture.
@@ -80,6 +81,16 @@ impl SimpleRenderer {
         let projection = Mat4::from(projection);
         let projection_bind_group_layout = Self::mat4_bind_group_layout(data);
 
+        let camera_buffer = data
+            .graphics
+            .lock()
+            .device
+            .create_buffer_init(&BufferInitDescriptor {
+                label: None,
+                contents: bytemuck::cast_slice(&[Mat4::IDENTITY.to_cols_array_2d()]),
+                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            });
+
         let projection_buffer =
             data.graphics
                 .lock()
@@ -96,16 +107,23 @@ impl SimpleRenderer {
                 .device
                 .create_bind_group(&wgpu::BindGroupDescriptor {
                     label: None,
-                    entries: &[wgpu::BindGroupEntry {
-                        binding: 0,
-                        resource: projection_buffer.as_entire_binding(),
-                    }],
+                    entries: &[
+                        wgpu::BindGroupEntry {
+                            binding: 0,
+                            resource: projection_buffer.as_entire_binding(),
+                        },
+                        wgpu::BindGroupEntry {
+                            binding: 1,
+                            resource: camera_buffer.as_entire_binding(),
+                        },
+                    ],
                     layout: &projection_bind_group_layout,
                 });
 
         Self {
             color_pipeline: Self::color_pipeline(data),
             texture_pipeline: Self::texture_pipeline(data),
+            camera_buffer,
             projection_buffer,
             projection_bind_group,
             depth_texture_view: Self::depth_texture(data),
@@ -304,16 +322,28 @@ impl SimpleRenderer {
             .device
             .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 label: None,
-                entries: &[wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::VERTEX,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::VERTEX,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
                     },
-                    count: None,
-                }],
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::VERTEX,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    },
+                ],
             })
     }
 

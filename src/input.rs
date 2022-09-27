@@ -176,14 +176,12 @@ impl From<Key> for ScanCode {
             Key::Char('b') => 48,
             Key::Char('n') => 49,
             Key::Char('m') => 50,
-            Key::Fn(num) => {
-                match num {
-                    1..=10 => num as u32 + 58,
-                    11 => 87,
-                    12 => 88,
-                    13..=24 => num as u32 + 170,
-                    _ => panic!("{INVALID_FN}{num}"),
-                }
+            Key::Fn(num) => match num {
+                1..=10 => num as u32 + 58,
+                11 => 87,
+                12 => 88,
+                13..=24 => num as u32 + 170,
+                _ => panic!("{INVALID_FN}{num}"),
             },
             Key::Char(key) => panic!("{INVALID_CHAR}{key}"),
             Key::Other(scancode) => scancode,
@@ -306,7 +304,7 @@ impl From<Key> for ScanCode {
                 12 => 0x58,
                 13..=19 => num as u32 + 95,
                 _ => panic!("{INVALID_FN}{num}"),
-            }
+            },
             Key::Char(key) => panic!("{}{key}", INVALID_CHAR),
             Key::Other(scancode) => scancode,
         }
