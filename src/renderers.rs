@@ -138,7 +138,7 @@ impl SimpleRenderer {
     pub fn set_camera(&mut self, data: &GameData, camera: Mat4) {
         data.graphics.lock().queue.write_buffer(
             &self.camera_buffer,
-            size_of::<[[f32; 4]; 4]>() as u64,
+            0,
             bytemuck::cast_slice(&[camera.to_cols_array_2d()]),
         )
     }

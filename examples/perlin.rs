@@ -9,21 +9,12 @@ use rhachis::{
     Game, GameData, GameExt,
 };
 
-fn make_projection(data: &GameData, distance: f32, angle: f32) -> Mat4 {
-    let proj = Mat4::perspective_rh(
-        TAU / 4.0,
-        data.get_window_size().x as f32 / data.get_window_size().y as f32,
-        0.1,
-        100.0,
-    );
-
-    let view = Mat4::look_at_rh(
+fn camera(data: &GameData, distance: f32, angle: f32) -> Mat4 {
+    Mat4::look_at_rh(
         Vec3::new(f32::sin(angle), 1.0 / (distance / 5.0), f32::cos(angle)) * distance,
         Vec3::ZERO,
         Vec3::Y,
-    );
-
-    proj * view
+    )
 }
 
 #[rhachis::run]
@@ -43,8 +34,9 @@ impl Game for PerlinExample {
 
         let mut renderer = SimpleRenderer::new(
             data,
-            SimpleProjection::Other(make_projection(data, cam_distance, cam_angle)),
+            SimpleProjection::new_perspective(data),
         );
+        renderer.set_camera(data, camera(data, cam_distance, cam_angle));
 
         renderer.models.push(
             Model::from_obj(
@@ -94,8 +86,7 @@ impl Game for PerlinExample {
         }
 
         if cam_move {
-            let projection = make_projection(data, self.cam_distance, self.cam_angle);
-            self.renderer.set_projection(data, projection);
+            self.renderer.set_camera(data, camera(data, self.cam_distance, self.cam_angle));
         }
     }
 
