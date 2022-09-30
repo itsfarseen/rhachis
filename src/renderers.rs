@@ -630,6 +630,72 @@ impl Model {
         Ok(to_ret)
     }
 
+    pub fn cube(data: &GameData, transforms: Vec<Transform>) -> Self {
+        Self::new(
+            data,
+            VertexSlice::ColorVertices(&[
+                ColorVertex {
+                    pos: [-1.0, -1.0, 1.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+                ColorVertex {
+                    pos: [1.0, -1.0, 1.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+                ColorVertex {
+                    pos: [-1.0, 1.0, 1.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+                ColorVertex {
+                    pos: [1.0, 1.0, 1.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+                ColorVertex {
+                    pos: [-1.0, -1.0, -1.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+                ColorVertex {
+                    pos: [1.0, -1.0, -1.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+                ColorVertex {
+                    pos: [-1.0, 1.0, -1.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+                ColorVertex {
+                    pos: [1.0, 1.0, -1.0],
+                    color: [1.0, 1.0, 1.0, 1.0],
+                },
+            ]),
+            &[
+                // Top
+                7, 6, 2,
+                2, 3, 7,
+
+                // Bottom
+                0, 4, 5,
+                5, 1, 0,
+
+                // Left
+                0, 2, 6,
+                6, 4, 0,
+
+                // Right
+                7, 3, 1,
+                1, 5, 7,
+
+                // Front
+                3, 2, 0,
+                0, 1, 3,
+
+                // Back
+                4, 6, 7,
+                7, 5, 4,
+            ],
+            transforms,
+        )
+    }
+
     /// Makes a model that is a plain white square.
     pub fn quad(data: &GameData, transforms: Vec<Transform>) -> Self {
         Self::new(
