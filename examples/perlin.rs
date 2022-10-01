@@ -32,10 +32,7 @@ impl Game for PerlinExample {
         let cam_distance = 2.0;
         let cam_angle = 0.0;
 
-        let mut renderer = SimpleRenderer::new(
-            data,
-            SimpleProjection::new_perspective(data),
-        );
+        let mut renderer = SimpleRenderer::new(data, SimpleProjection::new_perspective(data));
         renderer.set_camera(data, camera(cam_distance, cam_angle));
 
         renderer.models.push(
@@ -86,7 +83,8 @@ impl Game for PerlinExample {
         }
 
         if cam_move {
-            self.renderer.set_camera(data, camera(self.cam_distance, self.cam_angle));
+            self.renderer
+                .set_camera(data, camera(self.cam_distance, self.cam_angle));
         }
     }
 
