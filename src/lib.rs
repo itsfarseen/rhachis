@@ -21,7 +21,9 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
-#[doc = include_str!("../run-macro/README.md")]
+/// Shorthand for making a main function.
+///
+/// See the [rhachis-run-macro](https://docs.rs/rhachis-run-macro) crate for more details.
 pub use rhachis_run_macro::run;
 
 /// A struct containing most of the global state of the engine.
