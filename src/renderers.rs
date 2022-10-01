@@ -952,6 +952,7 @@ pub struct Texture {
 }
 
 impl Texture {
+    /// Creates a texture from specified image information.
     pub fn new(data: &GameData, image: &DynamicImage, sampler: &Sampler) -> Texture {
         let (width, height) = image.dimensions();
 
@@ -1017,6 +1018,9 @@ impl Texture {
         Texture { diffuse }
     }
 
+    /// Gets an image from `cache`, inserting it if it has not already been loaded.
+    /// This is limited as it only uses `path` as the key, so `sampler` is ignored
+    /// when searching for textures.
     pub fn load<'a, P: AsRef<Path> + Clone + Eq + Hash>(
         data: &GameData,
         path: P,
