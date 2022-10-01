@@ -1,3 +1,7 @@
+[![Crates.io](https://img.shields.io/crates/v/rhachis?style=flat-square)](https://crates.io/crates/rhachis)
+[![Crates.io](https://img.shields.io/crates/d/rhachis?style=flat-square)](https://crates.io/crates/rhachis)
+[![Docs.rs](https://img.shields.io/docsrs/rhachis?style=flat-square)](https://docs.rs/rhachis)
+
 # Rhachis
 
 Rhachis is a Rust framework primarily intended for making games. It intends to be as simple as possible, while still allowing as much customisation and power writing the engine yourself can.
