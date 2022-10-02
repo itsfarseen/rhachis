@@ -91,6 +91,10 @@ impl Game for PerlinExample {
     fn get_renderer(&mut self) -> &mut dyn rhachis::graphics::Renderer {
         &mut self.renderer
     }
+
+    fn resized(&mut self, data: &GameData, _: glam::UVec2) {
+        self.renderer.set_projection(data, SimpleProjection::new_perspective(data));
+    }
 }
 
 fn terrain_transforms(noise: &Noise) -> Vec<Transform> {

@@ -145,11 +145,11 @@ impl SimpleRenderer {
 
     /// Replaces the projection of the renderer and updates its
     /// buffer
-    pub fn set_projection(&mut self, data: &GameData, projection: Mat4) {
+    pub fn set_projection(&mut self, data: &GameData, projection: SimpleProjection) {
         data.graphics.lock().queue.write_buffer(
             &self.projection_buffer,
             0,
-            bytemuck::cast_slice(&[projection.to_cols_array_2d()]),
+            bytemuck::cast_slice(&[Mat4::from(projection).to_cols_array_2d()]),
         )
     }
 
