@@ -80,6 +80,8 @@ pub trait Game {
     /// Called after every event is handled by the engine in case special behaviour
     /// is required for an event.
     fn handle_event(&mut self, data: &GameData, event: Event<()>) {}
+    /// Called when the window is resized or the scale factor changes.
+    fn resized(&mut self, size: UVec2) {}
 }
 
 /// Automatically implemented on everything that implements `Game`.
@@ -139,10 +141,12 @@ where
                     }
                     WindowEvent::Resized(size) => {
                         data.graphics.lock().resize(*size);
+                        game.resized(UVec2::new(size.width, size.height));
                         game.get_renderer().resize(&data);
                     }
                     WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                         data.graphics.lock().resize(**new_inner_size);
+                        game.resized(UVec2::new(new_inner_size.width, new_inner_size.height));
                         game.get_renderer().resize(&data);
                     }
                     _ => {}
