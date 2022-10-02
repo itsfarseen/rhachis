@@ -18,7 +18,7 @@ impl Game for Image {
                 &image::open("examples/test.png").unwrap(),
                 &renderer.linear_sampler,
             ),
-            vec![Transform::scale((0.5, 0.5, 1.0).into())],
+            vec![Transform::scale((0.5, 0.5, 1.0))],
         ));
 
         Self { renderer }

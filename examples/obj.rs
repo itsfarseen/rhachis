@@ -24,8 +24,8 @@ impl Game for Obj {
                 "examples/texture.obj",
                 &renderer.nearest_sampler,
                 vec![
-                    Transform::translation((0.0, 0.0, -4.0).into()),
-                    Transform::translation((0.0, 0.0, -4.0).into()),
+                    Transform::translation((0.0, 0.0, -4.0)),
+                    Transform::translation((0.0, 0.0, -4.0)),
                 ],
             )
             .unwrap()

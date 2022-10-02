@@ -103,9 +103,9 @@ fn terrain_transforms(noise: &Noise) -> Vec<Transform> {
                 + (perlin_2d(noise, pos / 10.0, smootherstep) * 3.0).floor();
 
             to_ret.push(
-                Transform::translation((x as f32, height - 2.0, -(y as f32 + 3.0)).into())
+                Transform::translation((x as f32, height - 2.0, -(y as f32 + 3.0)))
                     .with_rotation(Quat::from_rotation_y(TAU / 4.0))
-                    .with_scale((0.5, 0.5, 0.5).into()),
+                    .with_scale((0.5, 0.5, 0.5)),
             );
         }
     }

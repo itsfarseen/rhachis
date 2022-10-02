@@ -834,14 +834,14 @@ macro_rules! transform_methods {
                     &mut self.$i
                 }
 
-                pub fn [<with_ $i>](mut self, $i: $t) -> Self {
-                    self.$i = $i;
+                pub fn [<with_ $i>]<T: Into<$t>>(mut self, $i: T) -> Self {
+                    self.$i = $i.into();
                     self
                 }
 
-                pub fn $i($i: $t) -> Self {
+                pub fn $i<T: Into<$t>>($i: T) -> Self {
                     Self {
-                        $i,
+                        $i: $i.into(),
                         ..Default::default()
                     }
                 }
@@ -858,8 +858,8 @@ macro_rules! with_set_translation {
                     &mut self.translation.$i
                 }
 
-                pub fn [<with_ $i>](mut self, $i: f32) -> Self {
-                    self.translation.$i = $i;
+                pub fn [<with_ $i>]<T: Into<f32>>(mut self, $i: T) -> Self {
+                    self.translation.$i = $i.into();
                     self
                 }
             }
