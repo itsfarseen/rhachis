@@ -146,7 +146,10 @@ where
                     }
                     WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                         data.graphics.lock().resize(**new_inner_size);
-                        game.resized(&data, UVec2::new(new_inner_size.width, new_inner_size.height));
+                        game.resized(
+                            &data,
+                            UVec2::new(new_inner_size.width, new_inner_size.height),
+                        );
                         game.get_renderer().resize(&data);
                     }
                     _ => {}

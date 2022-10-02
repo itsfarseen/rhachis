@@ -93,7 +93,8 @@ impl Game for PerlinExample {
     }
 
     fn resized(&mut self, data: &GameData, _: glam::UVec2) {
-        self.renderer.set_projection(data, SimpleProjection::new_perspective(data));
+        self.renderer
+            .set_projection(data, SimpleProjection::new_perspective(data));
     }
 }
 
