@@ -68,8 +68,8 @@ impl Graphics {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
         {
-            let render_pass = renderer.make_render_pass(&view, &mut encoder);
-            renderer.render(render_pass);
+            let mut render_pass = renderer.make_render_pass(&view, &mut encoder);
+            renderer.render(&mut render_pass);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
@@ -108,7 +108,7 @@ pub trait Renderer {
     }
 
     /// This is called every frame once the renderpass has been created.
-    fn render(&self, render_pass: RenderPass) {}
+    fn render<'a, 'b: 'a>(&'b self, render_pass: &'a mut RenderPass<'b>) {}
     /// This is called every frame after the game updates. This is for any state that the renderer
     /// itself will have to maintain.
     fn update(&mut self, data: &GameData) {}

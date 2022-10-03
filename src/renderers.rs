@@ -387,7 +387,7 @@ impl SimpleRenderer {
 }
 
 impl Renderer for SimpleRenderer {
-    fn render<'a>(&'a self, mut render_pass: wgpu::RenderPass<'a>) {
+    fn render<'a, 'b: 'a>(&'b self, render_pass: &'a mut wgpu::RenderPass<'b>) {
         render_pass.set_bind_group(0, &self.projection_bind_group, &[]);
         for model in &self.models {
             match &model.vertex_type {
