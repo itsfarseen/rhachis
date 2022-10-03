@@ -1,5 +1,6 @@
 //! Code specialised in handling graphics. Most of this is universally applicable.
 
+use downcast_rs::{impl_downcast, DowncastSync};
 use wgpu::{CommandEncoder, Device, Queue, RenderPass, Surface, SurfaceConfiguration, TextureView};
 use winit::{dpi::PhysicalSize, window::Window};
 
@@ -85,7 +86,7 @@ impl Graphics {
 
 #[allow(unused)]
 /// This trait must be implemented on all renderers. It exposes API for rendering a frame.
-pub trait Renderer {
+pub trait Renderer: DowncastSync {
     /// Make the default render pass. Most simple renderers don't need to replace this.
     /// This is called at the beginning of each frame.
     fn make_render_pass<'a>(
@@ -116,6 +117,8 @@ pub trait Renderer {
     /// a perspective projection aspect ratio.
     fn resize(&mut self, data: &GameData) {}
 }
+
+impl_downcast!(sync Renderer);
 
 /// A renderer that does nothing, useful for some tests.
 pub struct EmptyRenderer;
