@@ -1088,3 +1088,31 @@ impl TextureVertex {
         }
     }
 }
+
+impl Renderer for Vec<Box<dyn Renderer>> {
+    fn make_render_pass<'a>(
+        &'a self,
+        view: &'a TextureView,
+        encoder: &'a mut wgpu::CommandEncoder,
+    ) -> wgpu::RenderPass {
+        self[0].make_render_pass(view, encoder)
+    }
+
+    fn render<'a, 'b: 'a>(&'b self, render_pass: &'a mut wgpu::RenderPass<'b>) {
+        for renderer in self {
+            renderer.render(render_pass);
+        }
+    }
+
+    fn update(&mut self, data: &GameData) {
+        for renderer in self {
+            renderer.update(data);
+        }
+    }
+
+    fn resize(&mut self, data: &GameData) {
+        for renderer in self {
+            renderer.resize(data);
+        }
+    }
+}
