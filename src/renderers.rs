@@ -908,6 +908,23 @@ impl Transform {
     }
 }
 
+impl From<Mat4> for Transform {
+    fn from(mat: Mat4) -> Self {
+        let (scale, rotation, translation) = mat.to_scale_rotation_translation();
+        Self {
+            translation,
+            rotation,
+            scale,
+        }
+    }
+}
+
+impl From<Transform> for Vec<Transform> {
+    fn from(transform: Transform) -> Self {
+        vec![transform]
+    }
+}
+
 impl Default for Transform {
     fn default() -> Self {
         Self {
